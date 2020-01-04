@@ -43,7 +43,7 @@ module.exports = function (socket, extension) {
 
 			try {
 				socket.post('hubs/chat_message', {
-					hub_urls: [message.hub_url],
+					hub_urls: message.hub_urls,
 					text: output,
 				});
 
@@ -56,10 +56,11 @@ module.exports = function (socket, extension) {
 			try {
 				socket.post('private_chat/chat_message', {
 					user: {
-						hub_urls: [message.hub_url],
+						hub_url: message.user.hub_url,
 						cid: message.user.cid,
 					},
 					text: output,
+					echo: true,
 				});
 			} catch (e) {
 				console.error(`Failed to send: ${e}`);
@@ -134,10 +135,6 @@ module.exports = function (socket, extension) {
 -=[ Uptime: ${Utils.formatUptime(Utils.clientUptime(uptime))} ]=-
 -=[ System Uptime: ${Utils.formatUptime(os.uptime())} ]=-
 		`;
-		socket.post("events", {
-			text: output,
-			severity: "info"
-		});
 
 		sendMessage(message, output, type);
 
