@@ -43,7 +43,7 @@ module.exports = function (socket, extension) {
 
 			try {
 				socket.post('hubs/chat_message', {
-					hub_urls: message.hub_urls,
+					hub_urls: [message.hub_url],
 					text: output,
 				});
 
