@@ -8,10 +8,12 @@ Extension to run commands to output information.
 
 ## Available Commands
 
-* /uptime
-* /stats
-* /ratio
-* /sratio
+| Command | Description | Visibility |
+| :--- | :--- | :--- |
+| /uptime | Show uptime (Client & System) | (public, visible to everyone) |
+| /stats  | Show various stats (Client, Uptime, Ratio, CPU)| (public, visible to everyone) |
+| /ratio  | Show Upload/Download stats| (public, visible to everyone) |
+| /sratio | Show Session Upload/Download stats| (public, visible to everyone) |
 
 ## Resources
 

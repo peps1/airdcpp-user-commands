@@ -152,10 +152,10 @@ module.exports = function (socket, extension) {
 
 	User commands
 
-	/ratio
-	/sratio
-	/stats
-	/uptime
+    /uptime\t\tShow uptime (Client & System)\t\t\t(public, visible to everyone)
+    /stats\t\tShow various stats (Client, Uptime, Ratio, CPU)\t\t\t(public, visible to everyone)
+    /ratio\t\tShow Upload/Download stats\t\t\t(public, visible to everyone)
+    /sratio\t\tShow Session Upload/Download stats\t\t\t(public, visible to everyone)
 
 			`;
 		} else if (text == '/sratio') {
