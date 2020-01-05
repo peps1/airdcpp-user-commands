@@ -81,9 +81,13 @@ module.exports = function (socket, extension) {
   const getRatio = async () => {
     const results = await socket.get("transfers/tranferred_bytes");
 
-    const total_downloaded = Utils.formatSize(results.start_total_downloaded);
-    const total_uploaded = Utils.formatSize(results.start_total_uploaded);
-    const total_ratio = (results.start_total_uploaded / results.start_total_downloaded).toFixed(2);
+    // Total Stats
+    // For some reason the start_total_* values are not beeing updated after the client starts
+    // so we have to add the current session_* values to that.
+    const total_downloaded = Utils.formatSize(results.start_total_downloaded + results.session_downloaded);
+    const total_uploaded = Utils.formatSize(results.start_total_uploaded + results.session_uploaded);
+    const total_ratio = ((results.start_total_uploaded + results.session_uploaded) / (results.start_total_downloaded + results.session_downloaded)).toFixed(2);
+    // Session Stats
     const session_downloaded = Utils.formatSize(results.session_downloaded);
     const session_uploaded = Utils.formatSize(results.session_uploaded);
     const session_ratio = (results.session_uploaded / results.session_downloaded).toFixed(2);
@@ -105,7 +109,6 @@ module.exports = function (socket, extension) {
     const output = `Ratio Session: ${ratio.session_ratio} (Uploaded: ${ratio.session_uploaded} | Downloaded: ${ratio.session_downloaded} )`;
 
     sendMessage(message, output, type);
-
 
   }
 
