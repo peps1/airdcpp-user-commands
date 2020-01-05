@@ -1,6 +1,6 @@
 {
   "name": "airdcpp-user-commands",
-  "version": "1.0.5-alpha.5",
+  "version": "1.0.5",
   "description": "User commands to show information in chat",
   "license": "MIT",
   "author": {
