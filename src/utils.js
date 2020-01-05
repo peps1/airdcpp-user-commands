@@ -1,5 +1,7 @@
 'use strict';
 
+const os		= require('os');
+
 const byteUnits = [ 'kB','MB','GB','TB','PB','EB','ZB','YB' ];
 
 const priorityEnum = [
@@ -98,6 +100,37 @@ module.exports = {
 	getLastDirectory: function (fullPath) {
 		const result = fullPath.match(/([^\\\/]+)[\\\/]$/);
 		return result ? result[1] : fullPath;
+	},
+
+	getOsInfo: function () {
+
+		var os_info;
+		var e = null;
+
+		if (os.platform() == "win32") {
+			os_info = require('child_process').execSync('ver').toString().trim();
+		}
+		else if (os.platform() == "linux") {
+			try {
+				os_info = require('child_process').execSync('cat /etc/*release | grep PRETTY_NAME | awk -F \'"\' {\'print $2\'}').toString().trim();
+			} catch (e) {
+				os_info = "Unknown Linux"
+			}
+		}
+		else if (os.platform() == "darwin") {
+			os_info = `MacOS ${os.release()}`
+		}
+		else if (
+			os.platform() == "netbsd" ||
+			os.platform() == "freebsd"
+		) {
+			os_info = require('child_process').execSync('uname -mrs').toString().trim();
+		}
+		else {
+			os_info = "Unknown OS";
+		}
+
+		return [os_info, e];
 	},
 
 	sleep(ms) {

@@ -124,17 +124,23 @@ module.exports = function (socket, extension) {
     const sysinfo_results = await socket.get("system/system_info");
     const uptime = sysinfo_results.client_started
     const clientv = sysinfo_results.client_version
+    const os_info_result = Utils.getOsInfo()
+    const os_info = os_info_result[0]
+    const os_info_err = os_info_result[1]
     const ratio = await getRatio()
     const output = `
   -=[ ${clientv} http://www.airdcpp.net ]=-
   -=[ Uptime: ${Utils.formatUptime(Utils.clientUptime(uptime))} ]=-
   -=[ Ratio Session: ${ratio.session_ratio} (Uploaded: ${ratio.session_uploaded} | Downloaded: ${ratio.session_downloaded} ) ]=-
   -=[ Ratio Total: ${ratio.total_ratio} (Uploaded: ${ratio.total_uploaded} | Downloaded: ${ratio.total_downloaded} ) ]=-
-  -=[ OS: ${os.release()} (Uptime: ${Utils.formatUptime(os.uptime())}) ]=-
+  -=[ OS: ${os_info} (Uptime: ${Utils.formatUptime(os.uptime())}) ]=-
   -=[ CPU: ${os.cpus()[0].model} ]=-
     `;
 
     sendMessage(message, output, type);
+    if (os_info_err) {
+      postEvent(`Error when getting OS info: ${os_info_err}`, 'error');
+    }
 
   }
 
