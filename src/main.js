@@ -122,12 +122,12 @@ module.exports = function (socket, extension) {
 
   const printFullStats = async (message, type) => {
     const sysinfo_results = await socket.get("system/system_info");
-    const uptime = sysinfo_results.client_started
-    const clientv = sysinfo_results.client_version
-    const os_info_result = Utils.getOsInfo()
-    const os_info = os_info_result[0]
-    const os_info_err = os_info_result[1]
-    const ratio = await getRatio()
+    const uptime = sysinfo_results.client_started;
+    const clientv = sysinfo_results.client_version;
+    const os_info_result = Utils.getOsInfo();
+    const os_info = os_info_result[0];
+    const os_info_err = os_info_result[1];
+    const ratio = await getRatio();
     const output = `
   -=[ ${clientv} http://www.airdcpp.net ]=-
   -=[ Uptime: ${Utils.formatUptime(Utils.clientUptime(uptime))} ]=-

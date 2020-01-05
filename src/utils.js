@@ -61,6 +61,7 @@ const fileTypeEnum = [
 ];
 
 module.exports = {
+	// Format bytes to MiB, GiB, TiB
 	formatSize: function (fileSizeInBytes) {
 		const thresh = 1024;
 		if (Math.abs(fileSizeInBytes) < thresh) {
@@ -76,6 +77,7 @@ module.exports = {
 		return fileSizeInBytes.toFixed(2) + ' ' + byteUnits[u];
 	},
 
+	// AirDC Client uptime
 	clientUptime: function (startTime) {
 
 		var now = Math.round(Date.now() / 1000)
@@ -83,6 +85,7 @@ module.exports = {
 		return seconds
 	},
 
+	// Format nicely (151 days 18 hours 58 minutes 25 seconds)
 	formatUptime: function (seconds) {
     var d = Math.floor(seconds / 86400);
     var h = Math.floor(seconds % 86400 / 3600);
@@ -102,19 +105,24 @@ module.exports = {
 		return result ? result[1] : fullPath;
 	},
 
+	// Extracting OS info
+	// Windows: Microsoft Windows 10.0.19041.1
+	// Linux: Debian GNU/Linux 10 (buster) / Ubuntu 18.04.3 LTS
 	getOsInfo: function () {
 
 		var os_info;
 		var e = null;
 
 		if (os.platform() == "win32") {
-			os_info = require('child_process').execSync('ver').toString().trim();
+			const win_ver = require('child_process').execSync('ver').toString().trim();
+			const r = /(Version )|[[\]]/g
+			os_info = win_ver.replace(r, "")
 		}
 		else if (os.platform() == "linux") {
 			try {
-				os_info = require('child_process').execSync('cat /etc/*release | grep PRETTY_NAME | awk -F \'"\' {\'print $2\'}').toString().trim();
+				os_info = require('child_process').execSync('cat /etc/os-release | grep PRETTY_NAME | awk -F \'"\' {\'print $2\'}').toString().trim();
 			} catch (e) {
-				os_info = "Unknown Linux"
+				os_info = "Unknown Linux";
 			}
 		}
 		else if (os.platform() == "darwin") {
@@ -124,7 +132,11 @@ module.exports = {
 			os.platform() == "netbsd" ||
 			os.platform() == "freebsd"
 		) {
-			os_info = require('child_process').execSync('uname -mrs').toString().trim();
+			try {
+				os_info = require('child_process').execSync('uname -mrs').toString().trim();
+			} catch (e) {
+				os_info = "Unknown BSD";
+			}
 		}
 		else {
 			os_info = "Unknown OS";
