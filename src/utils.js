@@ -120,9 +120,9 @@ module.exports = {
 		}
 		else if (os.platform() == "linux") {
 			try {
-				os_info = require('child_process').execSync('cat /etc/os-release | grep PRETTY_NAME | awk -F \'"\' {\'print $2\'}').toString().trim();
+				os_info = require('child_process').execSync('. /etc/os-release && echo $PRETTY_NAME').toString().trim();
 			} catch (e) {
-				os_info = "Unknown Linux";
+				os_info = `Unknown Linux ${e}`;
 			}
 		}
 		else if (os.platform() == "darwin") {
