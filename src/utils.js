@@ -111,7 +111,7 @@ module.exports = {
 	getOsInfo: function () {
 
 		var os_info;
-		var e = null;
+		var errors = [];
 
 		if (os.platform() == "win32") {
 			const win_ver = require('child_process').execSync('ver').toString().trim();
@@ -122,7 +122,8 @@ module.exports = {
 			try {
 				os_info = require('child_process').execSync('. /etc/os-release && echo $PRETTY_NAME').toString().trim();
 			} catch (e) {
-				os_info = `Unknown Linux ${e}`;
+				os_info = "Unknown Linux";
+				errors.push(e)
 			}
 		}
 		else if (os.platform() == "darwin") {
@@ -136,13 +137,14 @@ module.exports = {
 				os_info = require('child_process').execSync('uname -mrs').toString().trim();
 			} catch (e) {
 				os_info = "Unknown BSD";
+				errors.push(e)
 			}
 		}
 		else {
 			os_info = "Unknown OS";
 		}
 
-		return [os_info, e];
+		return [os_info, errors];
 	},
 
 	sleep(ms) {
