@@ -138,7 +138,7 @@ module.exports = function (socket, extension) {
     `;
 
     sendMessage(message, output, type);
-    if (os_info_err) {
+    if (! os_info_err.length == 0) {
       postEvent(`Error when getting OS info: ${os_info_err}`, 'error');
     }
 
