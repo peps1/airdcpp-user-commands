@@ -39,9 +39,9 @@ module.exports = function (socket, extension) {
 
   };
 
-  const postEvent = (message, severity) => {
+  const printEvent = (event_message, severity) => {
 		socket.post('events', {
-			text: `${message}`,
+			text: `${event_message}`,
 			severity,
 		});
 	};
@@ -57,7 +57,7 @@ module.exports = function (socket, extension) {
         });
 
       } catch (e) {
-        postEvent(`Failed to send: ${e}`, 'error');
+        printEvent(`Failed to send: ${e}`, 'error');
       }
 
     } else {
@@ -72,7 +72,7 @@ module.exports = function (socket, extension) {
           echo: true,
         });
       } catch (e) {
-        postEvent(`Failed to send: ${e}`, 'error');
+        printEvent(`Failed to send: ${e}`, 'error');
       }
 
     }
@@ -139,7 +139,7 @@ module.exports = function (socket, extension) {
 
     sendMessage(message, output, type);
     if (! os_info_err.length == 0) {
-      postEvent(`Error when getting OS info: ${os_info_err}`, 'error');
+      printEvent(`Error when getting OS info: ${os_info_err}`, 'error');
     }
 
   }
@@ -153,6 +153,36 @@ module.exports = function (socket, extension) {
     `;
 
     sendMessage(message, output, type);
+
+  }
+
+  const listShare = async (message) => {
+    const command = message.text.split(" ");
+    if (command.length === 3) {
+      const username = command[1];
+      const list_dir = command[2];
+      const user_results = await socket.post("users/search_nicks", {
+        pattern: username,
+        max_results: 1,
+      });
+
+      printStatusMessage(message, user_results.toString());
+      printEvent(`User results: ${user_results.toString()}`, 'info');
+
+      const file_results = await socket.post("filelists", {
+        user: {
+          cid: user_results[0].cid,
+          hub_url: user_results[0].hub_url,
+        },
+        directory: list_dir,
+      });
+
+      printStatusMessage(message, file_results.toString());
+      printEvent(`File results: ${file_results.toString()}`, 'info');
+
+    } else {
+      printEvent('Missing parameter, needs username and directory path.', 'error');
+    }
 
   }
 
@@ -185,6 +215,9 @@ module.exports = function (socket, extension) {
         return null;
     } else if (text == '/uptime') {
         printUptime(message, type);
+        return null;
+    } else if (text.startsWith('/list ')) {
+        listShare(message, type);
         return null;
     }
 
