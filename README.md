@@ -14,6 +14,7 @@ Extension to run commands to output information.
 | /stats  | Show various stats (Client, Uptime, Ratio, CPU)| (public, visible to everyone) |
 | /ratio  | Show Upload/Download stats| (public, visible to everyone) |
 | /sratio | Show Session Upload/Download stats| (public, visible to everyone) |
+| /version | Show user-commands extension version| (private, visible only to yourself) |
 
 ## Resources
 
