@@ -13,7 +13,7 @@ export default (socket, extension) => {
   const onOutgoingHubMessage = (message, accept) => {
     const statusMessage = checkChatCommand(message, 'hub');
     if (statusMessage) {
-      printStatusMessage(message, statusMessage);
+      printStatusMessage(message, statusMessage, 'hub');
     }
 
     accept();
@@ -23,19 +23,35 @@ export default (socket, extension) => {
   const onOutgoingPrivateMessage = (message, accept) => {
     const statusMessage = checkChatCommand(message, 'private');
     if (statusMessage) {
-      printStatusMessage(message, statusMessage);
+      printStatusMessage(message, statusMessage, 'private');
     }
 
     accept();
 
   };
 
-  const printStatusMessage = (message, statusMessage) => {
-    socket.post('hubs/status_message', {
-      hub_urls: [ message.hub_url ],
-      text: statusMessage,
-      severity: 'info',
-    });
+  const printStatusMessage = (message, statusMessage, type) => {
+    if (type === 'hub') {
+      try {
+        socket.post('hubs/status_message', {
+          hub_urls: [ message.hub_url ],
+          text: statusMessage,
+          severity: 'info',
+        });
+      } catch (e) {
+        printEvent(`Failed to send: ${e}`, 'error');
+      }
+    } else {
+      try {
+        socket.post(`private_chat/${message.user.cid}/status_message`, {
+          hub_urls: [ message.hub_url ],
+          text: statusMessage,
+          severity: 'info',
+        });
+      } catch (e) {
+        printEvent(`Failed to send: ${e}`, 'error');
+      }
+    }
 
   };
 
@@ -156,6 +172,14 @@ export default (socket, extension) => {
 
   };
 
+  const printVersion = async (message, type) => {
+    const output = process.env.npm_package_version;
+
+    //sendMessage(message, `Extension Version: ${output}`, type);
+    printStatusMessage(message, `Extension Version: ${output}`, type);
+
+  };
+
   const listShare = async (message) => {
     const command = message.text.split(' ');
     if (command.length === 3) {
@@ -216,6 +240,7 @@ export default (socket, extension) => {
     /stats\t\tShow various stats (Client, Uptime, Ratio, CPU)\t\t\t(public, visible to everyone)
     /ratio\t\tShow Upload/Download stats\t\t\t(public, visible to everyone)
     /sratio\t\tShow Session Upload/Download stats\t\t\t(public, visible to everyone)
+    /version\t\tShow user-commands extension version\t\t\t(private, visible only to yourself)
 
       `;
     } else if (text === '/sratio') {
@@ -229,6 +254,9 @@ export default (socket, extension) => {
         return null;
     } else if (text === '/uptime') {
         printUptime(message, type);
+        return null;
+    } else if (text === '/version') {
+        printVersion(message, type);
         return null;
     } else if (text.startsWith('/list ')) {
         listShare(message);
