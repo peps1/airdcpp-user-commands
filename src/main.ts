@@ -4,14 +4,14 @@
 // Additionally it provides handling for outgoing chat commands that can also be used to
 // add/remove ignored words (note that changes are not persisted when reloading the script)
 
-const Utils = require('./utils');
-const os		= require('os');
+import os from 'os';
+import * as Utils from './utils';
 
 // MODULE
-module.exports = function (socket, extension) {
+export default (socket, extension) => {
 
   const onOutgoingHubMessage = (message, accept) => {
-    const statusMessage = checkChatCommand(message, "hub");
+    const statusMessage = checkChatCommand(message, 'hub');
     if (statusMessage) {
       printStatusMessage(message, statusMessage);
     }
@@ -21,7 +21,7 @@ module.exports = function (socket, extension) {
   };
 
   const onOutgoingPrivateMessage = (message, accept) => {
-    const statusMessage = checkChatCommand(message, "private");
+    const statusMessage = checkChatCommand(message, 'private');
     if (statusMessage) {
       printStatusMessage(message, statusMessage);
     }
@@ -39,16 +39,16 @@ module.exports = function (socket, extension) {
 
   };
 
-  const printEvent = (event_message, severity) => {
-		socket.post('events', {
-			text: `${event_message}`,
-			severity,
-		});
-	};
+  const printEvent = (eventMessage, severity) => {
+    socket.post('events', {
+      text: `${eventMessage}`,
+      severity,
+    });
+  };
 
   const sendMessage = async (message, output, type) => {
 
-    if (type == "hub") {
+    if (type === 'hub') {
 
       try {
         socket.post('hubs/chat_message', {
@@ -76,77 +76,77 @@ module.exports = function (socket, extension) {
       }
 
     }
-  }
+  };
 
   const getRatio = async () => {
-    const results = await socket.get("transfers/tranferred_bytes");
+    const results = await socket.get('transfers/tranferred_bytes');
 
     // Total Stats
     // For some reason the start_total_* values are not beeing updated after the client starts
     // so we have to add the current session_* values to that.
-    const total_downloaded = Utils.formatSize(results.start_total_downloaded + results.session_downloaded);
-    const total_uploaded = Utils.formatSize(results.start_total_uploaded + results.session_uploaded);
-    const total_ratio = ((results.start_total_uploaded + results.session_uploaded) / (results.start_total_downloaded + results.session_downloaded)).toFixed(2);
+    const totalDownloaded = Utils.formatSize(results.start_total_downloaded + results.session_downloaded);
+    const totalUploaded = Utils.formatSize(results.start_total_uploaded + results.session_uploaded);
+    const totalRatio = ((results.start_total_uploaded + results.session_uploaded) / (results.start_total_downloaded + results.session_downloaded)).toFixed(2);
     // Session Stats
-    const session_downloaded = Utils.formatSize(results.session_downloaded);
-    const session_uploaded = Utils.formatSize(results.session_uploaded);
-    const session_ratio = (results.session_uploaded / results.session_downloaded).toFixed(2);
+    const sessionDownloaded = Utils.formatSize(results.session_downloaded);
+    const sessionUploaded = Utils.formatSize(results.session_uploaded);
+    const sessionRatio = (results.session_uploaded / results.session_downloaded).toFixed(2);
 
     const ratio = {
-      "total_downloaded": total_downloaded,
-      "total_uploaded": total_uploaded,
-      "total_ratio": total_ratio,
-      "session_downloaded": session_downloaded,
-      "session_uploaded": session_uploaded,
-      "session_ratio": session_ratio,
+      total_downloaded: totalDownloaded,
+      total_uploaded: totalUploaded,
+      total_ratio: totalRatio,
+      session_downloaded: sessionDownloaded,
+      session_uploaded: sessionUploaded,
+      session_ratio: sessionRatio,
     };
 
     return ratio;
-  }
+  };
 
   const printRatioSession = async (message, type) => {
-    const ratio = await getRatio()
+    const ratio = await getRatio();
     const output = `Ratio Session: ${ratio.session_ratio} (Uploaded: ${ratio.session_uploaded} | Downloaded: ${ratio.session_downloaded} )`;
 
     sendMessage(message, output, type);
 
-  }
+  };
 
   const printRatioTotal = async (message, type) => {
-    const ratio = await getRatio()
+    const ratio = await getRatio();
     const output = `Ratio Total: ${ratio.total_ratio} (Uploaded: ${ratio.total_uploaded} | Downloaded: ${ratio.total_downloaded} )`;
 
     sendMessage(message, output, type);
 
-  }
+  };
 
   const printFullStats = async (message, type) => {
-    const sysinfo_results = await socket.get("system/system_info");
-    const uptime = sysinfo_results.client_started;
-    const clientv = sysinfo_results.client_version;
-    const os_info_result = Utils.getOsInfo();
-    const os_info = os_info_result[0];
-    const os_info_err = os_info_result[1];
+    const sysinfoResults = await socket.get('system/system_info');
+    const uptime = sysinfoResults.client_started;
+    const clientv = sysinfoResults.client_version;
+    const osInfoResult = Utils.getOsInfo();
+    const osInfo = osInfoResult[0];
+    const osInfoErr = osInfoResult[1];
     const ratio = await getRatio();
     const output = `
   -=[ ${clientv} http://www.airdcpp.net ]=-
   -=[ Uptime: ${Utils.formatUptime(Utils.clientUptime(uptime))} ]=-
   -=[ Ratio Session: ${ratio.session_ratio} (Uploaded: ${ratio.session_uploaded} | Downloaded: ${ratio.session_downloaded} ) ]=-
   -=[ Ratio Total: ${ratio.total_ratio} (Uploaded: ${ratio.total_uploaded} | Downloaded: ${ratio.total_downloaded} ) ]=-
-  -=[ OS: ${os_info} (Uptime: ${Utils.formatUptime(os.uptime())}) ]=-
+  -=[ OS: ${osInfo} (Uptime: ${Utils.formatUptime(os.uptime())}) ]=-
   -=[ CPU: ${os.cpus()[0].model} ]=-
     `;
 
     sendMessage(message, output, type);
-    if (! os_info_err.length == 0) {
-      printEvent(`Error when getting OS info: ${os_info_err}`, 'error');
+    if (osInfoErr.length !== 0) {
+      printEvent(`Error when getting OS info: ${osInfoErr}`, 'error');
     }
 
-  }
+  };
 
   const printUptime = async (message, type) => {
-    const results = await socket.get("system/system_info");
-    const uptime = results.client_started
+    const results = await socket.get('system/system_info');
+    const uptime = results.client_started;
     const output = `
 -=[ Uptime: ${Utils.formatUptime(Utils.clientUptime(uptime))} ]=-
 -=[ System Uptime: ${Utils.formatUptime(os.uptime())} ]=-
@@ -154,46 +154,60 @@ module.exports = function (socket, extension) {
 
     sendMessage(message, output, type);
 
-  }
+  };
 
   const listShare = async (message) => {
-    const command = message.text.split(" ");
+    const command = message.text.split(' ');
     if (command.length === 3) {
       const username = command[1];
-      const list_dir = command[2];
-      const user_results = await socket.post("users/search_nicks", {
+      const listDir = command[2];
+      const userResults = await socket.post('users/search_nicks', {
         pattern: username,
         max_results: 1,
       });
 
-      printStatusMessage(message, user_results.toString());
-      printEvent(`User results: ${user_results.toString()}`, 'info');
+      try {
+        const fileResults = await socket.post('filelists', {
+          user: {
+            cid: userResults[0].cid,
+            hub_url: userResults[0].hub_url,
+          },
+          directory: listDir,
+        });
 
-      const file_results = await socket.post("filelists", {
-        user: {
-          cid: user_results[0].cid,
-          hub_url: user_results[0].hub_url,
-        },
-        directory: list_dir,
-      });
+      } catch (e) {
+        if (e.code === 409) {
+          const allFilelists = await socket.get('filelists');
+          allFilelists.forEach(async (filelist) => {
+            if (filelist.user.cid === userResults[0].cid) {
+              const userFilelist = await socket.get(`filelists/${filelist.id}`);
+              console.log(userFilelist);
+            }
+          });
 
-      printStatusMessage(message, file_results.toString());
-      printEvent(`File results: ${file_results.toString()}`, 'info');
+        } else {
+          // printStatusMessage(message, e.toString());
+          printEvent(`File results: ${e.code} - ${e.message}`, 'info');
+        }
+
+      }
+      // printStatusMessage(message, file_results.state.time_finished.toString());
+      // printEvent(`File results: ${file_results.state.time_finished.toString()}`, 'info');
 
     } else {
       printEvent('Missing parameter, needs username and directory path.', 'error');
     }
 
-  }
+  };
 
   // Basic chat command handling, returns possible status message to post
   const checkChatCommand = (message, type) => {
-    const text = message.text
+    const text = message.text;
     if (text.length === 0 || text[0] !== '/') {
       return null;
     }
 
-    if (text == '/help') {
+    if (text === '/help') {
       return `
 
     User commands
@@ -204,20 +218,20 @@ module.exports = function (socket, extension) {
     /sratio\t\tShow Session Upload/Download stats\t\t\t(public, visible to everyone)
 
       `;
-    } else if (text == '/sratio') {
+    } else if (text === '/sratio') {
         printRatioSession(message, type);
         return null;
-    } else if (text == '/ratio') {
+    } else if (text === '/ratio') {
         printRatioTotal(message, type);
         return null;
-    } else if (text == '/stats') {
+    } else if (text === '/stats') {
         printFullStats(message, type);
         return null;
-    } else if (text == '/uptime') {
+    } else if (text === '/uptime') {
         printUptime(message, type);
         return null;
     } else if (text.startsWith('/list ')) {
-        listShare(message, type);
+        listShare(message);
         return null;
     }
 
