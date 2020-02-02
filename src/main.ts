@@ -30,7 +30,7 @@ export default (socket, extension) => {
 
   };
 
-  const printStatusMessage = (message, statusMessage, type) => {
+  const printStatusMessage = (message, statusMessage: string, type: string) => {
     if (type === 'hub') {
       try {
         socket.post('hubs/status_message', {
@@ -55,14 +55,14 @@ export default (socket, extension) => {
 
   };
 
-  const printEvent = (eventMessage, severity) => {
+  const printEvent = (eventMessage: string, severity: string) => {
     socket.post('events', {
       text: `${eventMessage}`,
       severity,
     });
   };
 
-  const sendMessage = async (message, output, type) => {
+  const sendMessage = async (message, output: string, type: string) => {
 
     if (type === 'hub') {
 
@@ -120,7 +120,7 @@ export default (socket, extension) => {
     return ratio;
   };
 
-  const printRatioSession = async (message, type) => {
+  const printRatioSession = async (message, type: string) => {
     const ratio = await getRatio();
     const output = `Ratio Session: ${ratio.session_ratio} (Uploaded: ${ratio.session_uploaded} | Downloaded: ${ratio.session_downloaded} )`;
 
@@ -128,7 +128,7 @@ export default (socket, extension) => {
 
   };
 
-  const printRatioTotal = async (message, type) => {
+  const printRatioTotal = async (message, type: string) => {
     const ratio = await getRatio();
     const output = `Ratio Total: ${ratio.total_ratio} (Uploaded: ${ratio.total_uploaded} | Downloaded: ${ratio.total_downloaded} )`;
 
@@ -136,7 +136,7 @@ export default (socket, extension) => {
 
   };
 
-  const printFullStats = async (message, type) => {
+  const printFullStats = async (message, type: string) => {
     const sysinfoResults = await socket.get('system/system_info');
     const uptime = sysinfoResults.client_started;
     const clientv = sysinfoResults.client_version;
@@ -145,7 +145,7 @@ export default (socket, extension) => {
     const osInfoErr = osInfoResult[1];
     const ratio = await getRatio();
     const output = `
-  -=[ ${clientv} http://www.airdcpp.net ]=-
+  -=[ ${clientv} https://airdcpp-web.github.io/ ]=-
   -=[ Uptime: ${Utils.formatUptime(Utils.clientUptime(uptime))} ]=-
   -=[ Ratio Session: ${ratio.session_ratio} (Uploaded: ${ratio.session_uploaded} | Downloaded: ${ratio.session_downloaded} ) ]=-
   -=[ Ratio Total: ${ratio.total_ratio} (Uploaded: ${ratio.total_uploaded} | Downloaded: ${ratio.total_downloaded} ) ]=-
@@ -160,7 +160,7 @@ export default (socket, extension) => {
 
   };
 
-  const printUptime = async (message, type) => {
+  const printUptime = async (message, type: string) => {
     const results = await socket.get('system/system_info');
     const uptime = results.client_started;
     const output = `
@@ -172,7 +172,7 @@ export default (socket, extension) => {
 
   };
 
-  const printVersion = async (message, type) => {
+  const printVersion = async (message, type: string) => {
     const output = process.env.npm_package_version;
 
     //sendMessage(message, `Extension Version: ${output}`, type);
@@ -180,7 +180,7 @@ export default (socket, extension) => {
 
   };
 
-  const listShare = async (message) => {
+  const listShare = async (message: any) => {
     const command = message.text.split(' ');
     if (command.length === 3) {
       const username = command[1];
@@ -225,7 +225,7 @@ export default (socket, extension) => {
   };
 
   // Basic chat command handling, returns possible status message to post
-  const checkChatCommand = (message, type) => {
+  const checkChatCommand = (message, type: string) => {
     const text = message.text;
     if (text.length === 0 || text[0] !== '/') {
       return null;
