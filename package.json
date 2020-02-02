@@ -24,7 +24,7 @@
     "dev": "ts-node-dev --respawn --transpileOnly ./src/main.ts",
     "start": "node devtools/watch.js ../dist/main.js",
     "test": "nyc mocha -r ts-node/register test/*.ts",
-    "posttest": "nyc report --reporter=json > coverage/coverage.json",
+    "posttest": "nyc report --reporter=json",
     "prepublishOnly": "npm run build",
     "webpack": "webpack"
   },
