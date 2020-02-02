@@ -1,6 +1,6 @@
 {
   "name": "@peps1/airdcpp-user-commands",
-  "version": "2.0.0-alpha.2",
+  "version": "2.0.0-alpha.3",
   "description": "User commands to show information in chat",
   "license": "MIT",
   "author": {
@@ -23,7 +23,7 @@
     "clean": "rimraf dist",
     "dev": "ts-node-dev --respawn --transpileOnly ./src/main.ts",
     "start": "node devtools/watch.js ../dist/main.js",
-    "test": "nyc mocha ./test",
+    "test": "nyc mocha -r ts-node/register test/*.ts",
     "prepublishOnly": "npm run build",
     "webpack": "webpack"
   },
@@ -33,7 +33,10 @@
     "@babel/preset-env": "^7.8.4",
     "@babel/preset-typescript": "^7.8.3",
     "@babel/runtime": "^7.8.4",
+    "@types/chai": "^4.2.8",
+    "@types/mocha": "^7.0.1",
     "@types/node": "^13.7.0",
+    "@types/sinon": "^7.5.1",
     "@types/source-map-support": "^0.5.1",
     "airdcpp-extension": "^1.1.0",
     "airdcpp-extension-settings": "^1.1.0",
