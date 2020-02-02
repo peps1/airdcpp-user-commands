@@ -1,4 +1,4 @@
-# airdcpp-user-commands [![Travis][build-badge]][build] [![npm package][npm-badge]][npm]
+# airdcpp-user-commands [![Travis][build-badge]][build] [![npm package][npm-badge]][npm] [![codecov][coverage-badge]][coverage]
 
 Extension to run commands to output information.
 
@@ -25,3 +25,6 @@ Extension to run commands to output information.
 
 [npm-badge]: https://img.shields.io/npm/v/airdcpp-user-commands.svg?style=flat-square
 [npm]: https://www.npmjs.org/package/airdcpp-user-commands
+
+[coverage-badge]: https://codecov.io/gh/peps1/airdcpp-user-commands/branch/master/graph/badge.svg
+[coverage]: https://codecov.io/gh/peps1/airdcpp-user-commands
