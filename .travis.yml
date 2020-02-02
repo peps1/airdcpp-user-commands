@@ -2,15 +2,15 @@ sudo: required
 dist: bionic
 language: node_js
 node_js:
-- stable
-- node
-- 8
+  - 13
+  - 12
+  - 10
 before_install:
-# Update to the latest version as peer dependencies may cause issues otherwise
-- npm install npm -g
+  # Update to the latest version as peer dependencies may cause issues otherwise
+  - npm install npm -g
 script:
-- npm run build
-# - npm test
+  - npm run build
+  - npm test
 notifications:
   email:
     on_failure: change
