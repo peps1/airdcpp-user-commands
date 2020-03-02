@@ -30,6 +30,9 @@ export default (socket, extension) => {
 
   };
 
+  // Send a status message that is only shown locally in this chat session.
+  // https://airdcpp.docs.apiary.io/#reference/private-chat-sessions/methods/send-status-message
+  // https://airdcpp.docs.apiary.io/#reference/hub-sessions/messages/send-status-message
   const printStatusMessage = (message, statusMessage: string, type: string) => {
     if (type === 'hub') {
       try {
@@ -55,6 +58,11 @@ export default (socket, extension) => {
 
   };
 
+  // Events are used for displaying and logging informative messages and errors to the application user.
+  // Note that events are not bind to any specific context; some entities, such as hubs, provide similar
+  // methods for showing information locally to the application user.
+  // Messages will appear as popups and in the Events Log
+  // https://airdcpp.docs.apiary.io/#reference/events
   const printEvent = (eventMessage: string, severity: string) => {
     socket.post('events', {
       text: `${eventMessage}`,
@@ -120,6 +128,7 @@ export default (socket, extension) => {
     return ratio;
   };
 
+  // /sratio command
   const printRatioSession = async (message, type: string) => {
     const ratio = await getRatio();
     const output = `Ratio Session: ${ratio.session_ratio} (Uploaded: ${ratio.session_uploaded} | Downloaded: ${ratio.session_downloaded} )`;
@@ -128,6 +137,7 @@ export default (socket, extension) => {
 
   };
 
+  // /ratio command
   const printRatioTotal = async (message, type: string) => {
     const ratio = await getRatio();
     const output = `Ratio Total: ${ratio.total_ratio} (Uploaded: ${ratio.total_uploaded} | Downloaded: ${ratio.total_downloaded} )`;
@@ -136,6 +146,7 @@ export default (socket, extension) => {
 
   };
 
+  // /stats command
   const printFullStats = async (message, type: string) => {
     const sysinfoResults = await socket.get('system/system_info');
     const uptime = sysinfoResults.client_started;
@@ -160,6 +171,7 @@ export default (socket, extension) => {
 
   };
 
+  // /uptime command
   const printUptime = async (message, type: string) => {
     const results = await socket.get('system/system_info');
     const uptime = results.client_started;
@@ -172,6 +184,7 @@ export default (socket, extension) => {
 
   };
 
+  // /version command
   const printVersion = async (message, type: string) => {
     const output = process.env.npm_package_version;
 
@@ -180,17 +193,22 @@ export default (socket, extension) => {
 
   };
 
+  // /list command
   const listShare = async (message: any) => {
+    // split the command, first should be the username and then the directory to list
     const command = message.text.split(' ');
     if (command.length === 3) {
       const username = command[1];
       const listDir = command[2];
+      // search for the closest match with that username
+      // TODO: check if username matches at all
       const userResults = await socket.post('users/search_nicks', {
         pattern: username,
         max_results: 1,
       });
 
       try {
+        // Try to open the file list of that User
         const fileResults = await socket.post('filelists', {
           user: {
             cid: userResults[0].cid,
@@ -200,23 +218,57 @@ export default (socket, extension) => {
         });
 
       } catch (e) {
+        // The file list might be open already
         if (e.code === 409) {
-          const allFilelists = await socket.get('filelists');
-          allFilelists.forEach(async (filelist) => {
-            if (filelist.user.cid === userResults[0].cid) {
-              const userFilelist = await socket.get(`filelists/${filelist.id}`);
-              console.log(userFilelist);
+          // Get the already opened file list
+          // const userFilelist = await socket.get(`filelists/${userResults[0].cid}/items/0/5`);
+          let userFilelist = await socket.get(`filelists/${userResults[0].cid}`);
+          // check what folder is used
+          if (`${listDir}/` === userFilelist.location.path) {
+            const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/5`);
+            console.log(userFilelistItems);
+          } else {
+            try {
+              console.log('Filelist not in correct folder, switching folder.');
+              await socket.post(`filelists/${userResults[0].cid}/directory`, {
+                list_path: `${listDir}/`,
+                reload: false,
+              });
+
+              let fileListTimeFinished = 0;
+              let fileListCompletionRetries = 0
+              while (fileListTimeFinished === 0) {
+                userFilelist = await socket.get(`filelists/${userResults[0].cid}`);
+                fileListTimeFinished = userFilelist.state.time_finished;
+                console.log(`User file list status: ${userFilelist.state.str}`)
+                console.log(`User file path: ${userFilelist.location.path}`)
+                Utils.sleep(1000);
+                if (fileListCompletionRetries >= 5) {
+                  console.log(`Retry limit reached exiting...`)
+                  break;
+                }
+                fileListCompletionRetries++;
+              }
+
+              if (fileListTimeFinished !== 0) {
+                const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/5`);
+                console.log(userFilelistItems);
+              } else {
+                console.log(`Error when downloading file list. I gave up.`)
+              }
+
+            } catch (e) {
+              printEvent(`File results: ${e.code} - ${e.message}`, 'info');
             }
-          });
+          }
+          // if wrong folder is open, change to correct one
+          // console.log(userFilelist);
 
         } else {
-          // printStatusMessage(message, e.toString());
           printEvent(`File results: ${e.code} - ${e.message}`, 'info');
         }
 
       }
-      // printStatusMessage(message, file_results.state.time_finished.toString());
-      // printEvent(`File results: ${file_results.state.time_finished.toString()}`, 'info');
 
     } else {
       printEvent('Missing parameter, needs username and directory path.', 'error');
