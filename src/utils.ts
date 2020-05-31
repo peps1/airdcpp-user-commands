@@ -1,13 +1,12 @@
 'use strict';
 
-import child_process from 'child_process';
+import ChildProcess from 'child_process';
 import os from 'os';
 
 const byteUnits = ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
 // Format bytes to MiB, GiB, TiB
-export let formatSize = (fileSizeInBytes: number): string => {
-  let result: string;
+export const formatSize = (fileSizeInBytes: number): string => {
   const thresh = 1024;
   if (Math.abs(fileSizeInBytes) < thresh) {
     return fileSizeInBytes + ' B';
@@ -19,19 +18,19 @@ export let formatSize = (fileSizeInBytes: number): string => {
     ++u;
   } while (Math.abs(fileSizeInBytes) >= thresh && u < byteUnits.length - 1);
 
-  result = fileSizeInBytes.toFixed(2) + ' ' + byteUnits[u];
+  const result = fileSizeInBytes.toFixed(2) + ' ' + byteUnits[u];
   return result;
 };
 
 // AirDC Client uptime
-export let clientUptime = (startTime: number): number => {
+export const clientUptime = (startTime: number): number => {
   const now = Math.round(Date.now() / 1000);
   const seconds = Math.abs(now - startTime);
   return seconds;
 };
 
 // Format nicely (151 days 18 hours 58 minutes 25 seconds)
-export let formatUptime = (seconds: number): string => {
+export const formatUptime = (seconds: number): string => {
   const d = Math.floor(seconds / 86400);
   const h = Math.floor((seconds % 86400) / 3600);
   const m = Math.floor(((seconds % 86400) % 3600) / 60);
@@ -45,20 +44,20 @@ export let formatUptime = (seconds: number): string => {
 };
 
 // Works only for directories
-export let getLastDirectory = (fullPath: string) => {
-  const result = fullPath.match(/([^\\\/]+)[\\\/]$/);
+export const getLastDirectory = (fullPath: string) => {
+  const result = fullPath.match(/([^\\/]+)[\\/]$/);
   return result ? result[1] : fullPath;
 };
 
 // Extracting OS info
 // Windows: Microsoft Windows 10.0.19041.1
 // Linux: Debian GNU/Linux 10 (buster) / Ubuntu 18.04.3 LTS
-export let getOsInfo = () => {
+export const getOsInfo = () => {
   let osInfo;
-  const errors = [] as any;
+  const errors = [];
 
   if (os.platform() === 'win32') {
-    const winVer = child_process
+    const winVer = ChildProcess
       .execSync('ver')
       .toString()
       .trim();
@@ -66,7 +65,7 @@ export let getOsInfo = () => {
     osInfo = winVer.replace(r, '');
   } else if (os.platform() === 'linux') {
     try {
-      osInfo = child_process
+      osInfo = ChildProcess
         .execSync('. /etc/os-release && echo $PRETTY_NAME')
         .toString()
         .trim();
@@ -78,7 +77,7 @@ export let getOsInfo = () => {
     osInfo = `MacOS ${os.release()}`;
   } else if (os.platform() === 'netbsd' || os.platform() === 'freebsd') {
     try {
-      osInfo = child_process
+      osInfo = ChildProcess
         .execSync('uname -mrs')
         .toString()
         .trim();
@@ -93,11 +92,11 @@ export let getOsInfo = () => {
   return [osInfo, errors];
 };
 
-export let sleep = (ms: number) => {
+export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-export let parseSearchQuery = (item: { pattern: any; extensions: string; file_type: any; min_size: number; }) => {
+export const parseSearchQuery = (item: { pattern: any; extensions: string; file_type: any; min_size: number; }) => {
   return {
     pattern: item.pattern,
     extensions: item.extensions.split(';'),

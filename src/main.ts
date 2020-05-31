@@ -1,16 +1,13 @@
 'use strict';
 
-// This example script will reject incoming chat messages containing unwanted words
-// Additionally it provides handling for outgoing chat commands that can also be used to
-// add/remove ignored words (note that changes are not persisted when reloading the script)
-
 import os from 'os';
 import * as Utils from './utils';
 
 // MODULE
-export default (socket, extension) => {
 
-  const onOutgoingHubMessage = (message, accept) => {
+export default (socket: any, extension: any) => {
+
+  const onOutgoingHubMessage = (message: any, accept: any) => {
     const statusMessage = checkChatCommand(message, 'hub');
     if (statusMessage) {
       printStatusMessage(message, statusMessage, 'hub');
@@ -20,7 +17,7 @@ export default (socket, extension) => {
 
   };
 
-  const onOutgoingPrivateMessage = (message, accept) => {
+  const onOutgoingPrivateMessage = (message: any, accept: any) => {
     const statusMessage = checkChatCommand(message, 'private');
     if (statusMessage) {
       printStatusMessage(message, statusMessage, 'private');
@@ -33,7 +30,7 @@ export default (socket, extension) => {
   // Send a status message that is only shown locally in this chat session.
   // https://airdcpp.docs.apiary.io/#reference/private-chat-sessions/methods/send-status-message
   // https://airdcpp.docs.apiary.io/#reference/hub-sessions/messages/send-status-message
-  const printStatusMessage = (message, statusMessage: string, type: string) => {
+  const printStatusMessage = (message: any, statusMessage: string, type: string) => {
     if (type === 'hub') {
       try {
         socket.post('hubs/status_message', {
@@ -70,7 +67,7 @@ export default (socket, extension) => {
     });
   };
 
-  const sendMessage = async (message, output: string, type: string) => {
+  const sendMessage = async (message: any, output: string, type: string) => {
 
     if (type === 'hub') {
 
@@ -129,7 +126,7 @@ export default (socket, extension) => {
   };
 
   // /sratio command
-  const printRatioSession = async (message, type: string) => {
+  const printRatioSession = async (message: any, type: string) => {
     const ratio = await getRatio();
     const output = `Ratio Session: ${ratio.session_ratio} (Uploaded: ${ratio.session_uploaded} | Downloaded: ${ratio.session_downloaded} )`;
 
@@ -138,7 +135,7 @@ export default (socket, extension) => {
   };
 
   // /ratio command
-  const printRatioTotal = async (message, type: string) => {
+  const printRatioTotal = async (message: any, type: string) => {
     const ratio = await getRatio();
     const output = `Ratio Total: ${ratio.total_ratio} (Uploaded: ${ratio.total_uploaded} | Downloaded: ${ratio.total_downloaded} )`;
 
@@ -147,7 +144,7 @@ export default (socket, extension) => {
   };
 
   // /stats command
-  const printFullStats = async (message, type: string) => {
+  const printFullStats = async (message: any, type: string) => {
     const sysinfoResults = await socket.get('system/system_info');
     const uptime = sysinfoResults.client_started;
     const clientv = sysinfoResults.client_version;
@@ -172,7 +169,7 @@ export default (socket, extension) => {
   };
 
   // /uptime command
-  const printUptime = async (message, type: string) => {
+  const printUptime = async (message: any, type: string) => {
     const results = await socket.get('system/system_info');
     const uptime = results.client_started;
     const output = `
@@ -185,10 +182,10 @@ export default (socket, extension) => {
   };
 
   // /version command
-  const printVersion = async (message, type: string) => {
+  const printVersion = async (message: any, type: string) => {
     const output = process.env.npm_package_version;
 
-    //sendMessage(message, `Extension Version: ${output}`, type);
+    // sendMessage(message, `Extension Version: ${output}`, type);
     printStatusMessage(message, `Extension Version: ${output}`, type);
 
   };
@@ -209,7 +206,7 @@ export default (socket, extension) => {
 
       try {
         // Try to open the file list of that User
-        const fileResults = await socket.post('filelists', {
+        await socket.post('filelists', {
           user: {
             cid: userResults[0].cid,
             hub_url: userResults[0].hub_url,
@@ -217,16 +214,18 @@ export default (socket, extension) => {
           directory: listDir,
         });
 
-      } catch (e) {
+      } catch (filelistsError) {
         // The file list might be open already
-        if (e.code === 409) {
+        if (filelistsError.code === 409) {
           // Get the already opened file list
           // const userFilelist = await socket.get(`filelists/${userResults[0].cid}/items/0/5`);
-          let userFilelist = await socket.get(`filelists/${userResults[0].cid}`);
+          const userFilelist = await socket.get(`filelists/${userResults[0].cid}`);
           // check what folder is used
           if (`${listDir}/` === userFilelist.location.path) {
-            const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/5`);
-            console.log(userFilelistItems);
+            const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/9999`);
+            userFilelistItems.items.forEach((item: any) => {
+              console.log(item.name);
+            });
           } else {
             try {
               console.log('Filelist not in correct folder, switching folder.');
@@ -235,37 +234,22 @@ export default (socket, extension) => {
                 reload: false,
               });
 
-              let fileListTimeFinished = 0;
-              let fileListCompletionRetries = 0
-              while (fileListTimeFinished === 0) {
-                userFilelist = await socket.get(`filelists/${userResults[0].cid}`);
-                fileListTimeFinished = userFilelist.state.time_finished;
-                console.log(`User file list status: ${userFilelist.state.str}`)
-                console.log(`User file path: ${userFilelist.location.path}`)
-                Utils.sleep(1000);
-                if (fileListCompletionRetries >= 5) {
-                  console.log(`Retry limit reached exiting...`)
-                  break;
-                }
-                fileListCompletionRetries++;
-              }
+              const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/9999`);
+              console.log(`User file list status: ${userFilelist.state.str}`)
+              console.log(`User file path: ${userFilelist.location.path}`)
+              userFilelistItems.items.forEach((item: any) => {
+                console.log(item.name);
+              });
 
-              if (fileListTimeFinished !== 0) {
-                const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/5`);
-                console.log(userFilelistItems);
-              } else {
-                console.log(`Error when downloading file list. I gave up.`)
-              }
-
-            } catch (e) {
-              printEvent(`File results: ${e.code} - ${e.message}`, 'info');
+            } catch (error) {
+              printEvent(`File results: ${error.code} - ${error.message}`, 'info');
             }
           }
           // if wrong folder is open, change to correct one
           // console.log(userFilelist);
 
         } else {
-          printEvent(`File results: ${e.code} - ${e.message}`, 'info');
+          printEvent(`File results: ${filelistsError.code} - ${filelistsError.message}`, 'info');
         }
 
       }
@@ -277,7 +261,7 @@ export default (socket, extension) => {
   };
 
   // Basic chat command handling, returns possible status message to post
-  const checkChatCommand = (message, type: string) => {
+  const checkChatCommand = (message: any, type: string) => {
     const text = message.text;
     if (text.length === 0 || text[0] !== '/') {
       return null;
