@@ -7,8 +7,7 @@
       "useBuiltIns": "usage",
       "corejs": 3
     }],
-    "@babel/typescript",
-    "@babel/preset-typescript"
+    "@babel/typescript"
   ],
   "plugins": [
     ["@babel/plugin-transform-runtime", {

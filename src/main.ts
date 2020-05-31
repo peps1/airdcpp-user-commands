@@ -194,9 +194,9 @@ export default (socket: any, extension: any) => {
   const listShare = async (message: any) => {
     // split the command, first should be the username and then the directory to list
     const command = message.text.split(' ');
-    if (command.length === 3) {
+    if (command.length >= 3) {
       const username = command[1];
-      const listDir = command[2];
+      const listDir = command.slice(2).join(' ');
       // search for the closest match with that username
       // TODO: check if username matches at all
       const userResults = await socket.post('users/search_nicks', {
