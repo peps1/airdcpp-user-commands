@@ -74,7 +74,9 @@ export const getOsInfo = () => {
       errors.push(e);
     }
   } else if (os.platform() === 'darwin') {
-    osInfo = `MacOS ${os.release()}`;
+    const osRelease = ChildProcess.execSync('sw_vers -productVersion').toString().trim();
+    const osName = ChildProcess.execSync('sw_vers -productName').toString().trim();
+    osInfo = `${osName} ${osRelease}`;
   } else if (os.platform() === 'netbsd' || os.platform() === 'freebsd') {
     try {
       osInfo = ChildProcess
