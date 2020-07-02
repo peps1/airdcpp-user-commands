@@ -1,4 +1,4 @@
-# airdcpp-runscript-extension [![Travis][build-badge]][build] [![npm package][npm-badge]][npm]
+# airdcpp-user-commands [![Travis][build-badge]][build] [![npm package][npm-badge]][npm]
 
 Extension to run commands to output information.
 
