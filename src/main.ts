@@ -190,23 +190,60 @@ export default (socket: any, extension: any) => {
 
   };
 
+  const onFileListCreated = async (listener: any) => {
+    console.log(`File list created: ${listener}`);
+  };
+  const onFileListDirectoryDownloadAdded = async (listener: any) => {
+    console.log(`File list Download Added: ${listener}`);
+  };
+  const onFileListDirectoryDownloadRemoved = async (listener: any) => {
+    console.log(`File list Download Removed: ${listener}`);
+  };
+  const onFileListDirectoryDownloadProcessed= async (listener: any) => {
+    console.log(`File list Download Processed: ${listener}`);
+  };
+  const onFileListDirectoryDownloadFailed = async (listener: any) => {
+    console.log(`File list Download Failed: ${listener}`);
+  };
+
+  const listShareContent = async (userResults: any) => {
+    const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/9999`);
+    userFilelistItems.items.forEach((item: any) => {
+      console.log(item.name);
+    });
+  }
+
   // /list command
-  const listShare = async (message: any) => {
+  const listShare = async (message: any, type: string) => {
+
+    socket.addListener('filelists', 'filelist_created', onFileListCreated);
+    socket.addListener('filelists', 'filelist_directory_download_added', onFileListDirectoryDownloadAdded);
+    socket.addListener('filelists', 'filelist_directory_download_removed', onFileListDirectoryDownloadRemoved);
+    socket.addListener('filelists', 'filelist_directory_download_processed', onFileListDirectoryDownloadProcessed);
+    socket.addListener('filelists', 'filelist_directory_download_failed', onFileListDirectoryDownloadFailed);
+
     // split the command, first should be the username and then the directory to list
+    printStatusMessage(message, message.text, type);
     const command = message.text.split(' ');
     if (command.length >= 3) {
       const username = command[1];
-      const listDir = command.slice(2).join(' ');
+      // The path can have spaces, everything following the Username will be considered as the path
+      let listDir = command.slice(2).join(' ');
+      printStatusMessage(message, listDir.slice(-1), type);
+      if (listDir !== '/' || listDir.slice(-1) !== '/') {
+        listDir = `${listDir}/`;
+      }
       // search for the closest match with that username
       // TODO: check if username matches at all
       const userResults = await socket.post('users/search_nicks', {
         pattern: username,
         max_results: 1,
       });
+      printStatusMessage(message, `For user: "${userResults[0].nick}" Listing ${listDir}`, type);
 
       try {
         // Try to open the file list of that User
-        await socket.post('filelists', {
+        const fileListResult = await socket.post('filelists', {
           user: {
             cid: userResults[0].cid,
             hub_url: userResults[0].hub_url,
@@ -214,26 +251,32 @@ export default (socket: any, extension: any) => {
           directory: listDir,
         });
 
+        if (fileListResult.state.id === 'download_pending') {
+          Utils.sleep(3000)
+        }
+        listShareContent(userResults);
+
       } catch (filelistsError) {
         // The file list might be open already
         if (filelistsError.code === 409) {
           // Get the already opened file list
-          // const userFilelist = await socket.get(`filelists/${userResults[0].cid}/items/0/5`);
           const userFilelist = await socket.get(`filelists/${userResults[0].cid}`);
           // check what folder is used
-          if (`${listDir}/` === userFilelist.location.path) {
+          if (`${listDir}` === userFilelist.location.path) {
             const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/9999`);
             userFilelistItems.items.forEach((item: any) => {
               console.log(item.name);
             });
-          } else {
+          }
+          else {
             try {
               console.log('Filelist not in correct folder, switching folder.');
               await socket.post(`filelists/${userResults[0].cid}/directory`, {
-                list_path: `${listDir}/`,
+                list_path: `${listDir}`,
                 reload: false,
               });
 
+              // List all the files
               const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/9999`);
               console.log(`User file list status: ${userFilelist.state.str}`)
               console.log(`User file path: ${userFilelist.location.path}`)
@@ -242,17 +285,29 @@ export default (socket: any, extension: any) => {
               });
 
             } catch (error) {
-              printEvent(`File results: ${error.code} - ${error.message}`, 'info');
+              printEvent(`File results: ${error.code} - ${error.message}`, 'error');
+              printStatusMessage(message, `File results: ${error.code} - ${error.message}`, type);
             }
           }
-          // if wrong folder is open, change to correct one
-          // console.log(userFilelist);
 
         } else {
-          printEvent(`File results: ${filelistsError.code} - ${filelistsError.message}`, 'info');
+          try {
+              const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/9999`);
+              userFilelistItems.items.forEach((item: any) => {
+                console.log(item.name);
+              });
+          }
+          catch (f) {
+            printEvent(`File results: ${filelistsError.code} - ${filelistsError.message}`, 'error');
+            printStatusMessage(message, `File results: ${filelistsError.code} - ${filelistsError.message}`, type);
+          }
         }
 
+        printEvent(`File results: ${filelistsError.code} - ${filelistsError.message}`, 'error');
+        printStatusMessage(message, `File results: ${filelistsError.code} - ${filelistsError.message}`, type);
+
       }
+
 
     } else {
       printEvent('Missing parameter, needs username and directory path.', 'error');
@@ -276,6 +331,7 @@ export default (socket: any, extension: any) => {
     /stats\t\tShow various stats (Client, Uptime, Ratio, CPU)\t\t\t(public, visible to everyone)
     /ratio\t\tShow Upload/Download stats\t\t\t(public, visible to everyone)
     /sratio\t\tShow Session Upload/Download stats\t\t\t(public, visible to everyone)
+    /list username /share/path\t\tShow Session Upload/Download stats\t\t\t(public, visible to everyone)
     /version\t\tShow user-commands extension version\t\t\t(private, visible only to yourself)
 
       `;
@@ -295,7 +351,7 @@ export default (socket: any, extension: any) => {
         printVersion(message, type);
         return null;
     } else if (text.startsWith('/list ')) {
-        listShare(message);
+        listShare(message, type);
         return null;
     }
 
@@ -305,8 +361,8 @@ export default (socket: any, extension: any) => {
   extension.onStart = async () => {
 
     const subscriberInfo = {
-      id: 'chat_commands',
-      name: 'Chat commands',
+      id: 'user_commands',
+      name: 'User commands',
     };
 
     socket.addHook('hubs', 'hub_outgoing_message_hook', onOutgoingHubMessage, subscriberInfo);
