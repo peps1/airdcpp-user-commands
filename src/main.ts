@@ -213,6 +213,11 @@ export default (socket: any, extension: any) => {
     });
   }
 
+  const listShareSessionInfo = async (userResults: any) => {
+    const userFilelistSession = await socket.get(`filelists/${userResults[0].cid}`);
+    console.log(userFilelistSession)
+  }
+
   // /list command
   const listShare = async (message: any, type: string) => {
 
@@ -252,7 +257,11 @@ export default (socket: any, extension: any) => {
         });
 
         if (fileListResult.state.id === 'download_pending') {
-          Utils.sleep(3000)
+          console.log("Wait 3 seconds" + Date.now());
+          listShareSessionInfo(userResults);
+          await Utils.sleep(3000)
+          console.log("3 seconds are over" + Date.now());
+          listShareSessionInfo(userResults);
         }
         listShareContent(userResults);
 
