@@ -206,16 +206,40 @@ export default (socket: any, extension: any) => {
     console.log(`File list Download Failed: ${listener}`);
   };
 
-  const listShareContent = async (userResults: any) => {
-    const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/9999`);
-    userFilelistItems.items.forEach((item: any) => {
-      console.log(item.name);
-    });
+  const listShareContent = async (userResults: any, fileListResult: any) => {
+    // The Download might take a moment, make sure we don't ask the content too early
+    console.log(fileListResult);
+    if (fileListResult.state.id !== 'loaded') {
+      let fileListState = 'downloading'
+      while (fileListState !== 'loaded') {
+        console.log('Waiting 1 second while filelist is downloading...' + Date.now());
+        await Utils.sleep(1000);
+        // get the current filelist state
+        const fileListSession: any = await getFileListSessionInfo(userResults);
+        fileListState = fileListSession.state.id;
+      }
+      console.log('Listing Share content now...');
+      const userFilelistItems = await getFileListItems(userResults);
+      userFilelistItems.items.forEach((item: any) => {
+        console.log(item.name);
+      });
+    } else {
+      console.log('Listing Share content now, download was done already...');
+      const userFilelistItems = await getFileListItems(userResults);
+      userFilelistItems.items.forEach((item: any) => {
+        console.log(item.name);
+      });
+    }
   }
 
-  const listShareSessionInfo = async (userResults: any) => {
+  const getFileListItems = async (userResults: any) => {
+    const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/9999`);
+    return userFilelistItems;
+  }
+
+  const getFileListSessionInfo = async (userResults: any) => {
     const userFilelistSession = await socket.get(`filelists/${userResults[0].cid}`);
-    console.log(userFilelistSession)
+    return userFilelistSession;
   }
 
   // /list command
@@ -228,12 +252,14 @@ export default (socket: any, extension: any) => {
     socket.addListener('filelists', 'filelist_directory_download_failed', onFileListDirectoryDownloadFailed);
 
     // split the command, first should be the username and then the directory to list
+    // TODO: remove debug
     printStatusMessage(message, message.text, type);
     const command = message.text.split(' ');
     if (command.length >= 3) {
       const username = command[1];
       // The path can have spaces, everything following the Username will be considered as the path
       let listDir = command.slice(2).join(' ');
+      // TODO: remove debug
       printStatusMessage(message, listDir.slice(-1), type);
       if (listDir !== '/' || listDir.slice(-1) !== '/') {
         listDir = `${listDir}/`;
@@ -244,77 +270,52 @@ export default (socket: any, extension: any) => {
         pattern: username,
         max_results: 1,
       });
+      // TODO: remove debug
       printStatusMessage(message, `For user: "${userResults[0].nick}" Listing ${listDir}`, type);
 
+      let fileListResult;
       try {
         // Try to open the file list of that User
-        const fileListResult = await socket.post('filelists', {
+        fileListResult = await socket.post('filelists', {
           user: {
             cid: userResults[0].cid,
             hub_url: userResults[0].hub_url,
           },
           directory: listDir,
         });
+      }
 
-        if (fileListResult.state.id === 'download_pending') {
-          console.log("Wait 3 seconds" + Date.now());
-          listShareSessionInfo(userResults);
-          await Utils.sleep(3000)
-          console.log("3 seconds are over" + Date.now());
-          listShareSessionInfo(userResults);
-        }
-        listShareContent(userResults);
-
-      } catch (filelistsError) {
+      catch (fileListsError) {
         // The file list might be open already
-        if (filelistsError.code === 409) {
+        if (fileListsError.code === 409) {
           // Get the already opened file list
-          const userFilelist = await socket.get(`filelists/${userResults[0].cid}`);
+          const userFileList = await getFileListSessionInfo(userResults);
+
           // check what folder is used
-          if (`${listDir}` === userFilelist.location.path) {
-            const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/9999`);
-            userFilelistItems.items.forEach((item: any) => {
-              console.log(item.name);
-            });
-          }
-          else {
+          if (`${listDir}` !== userFileList.location.path) {
+            // A file list might be open already, but for another directory
             try {
-              console.log('Filelist not in correct folder, switching folder.');
+              console.log('File list not in correct folder, switching folder.');
               await socket.post(`filelists/${userResults[0].cid}/directory`, {
                 list_path: `${listDir}`,
                 reload: false,
-              });
-
-              // List all the files
-              const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/9999`);
-              console.log(`User file list status: ${userFilelist.state.str}`)
-              console.log(`User file path: ${userFilelist.location.path}`)
-              userFilelistItems.items.forEach((item: any) => {
-                console.log(item.name);
               });
 
             } catch (error) {
               printEvent(`File results: ${error.code} - ${error.message}`, 'error');
               printStatusMessage(message, `File results: ${error.code} - ${error.message}`, type);
             }
-          }
 
-        } else {
-          try {
-              const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/9999`);
-              userFilelistItems.items.forEach((item: any) => {
-                console.log(item.name);
-              });
-          }
-          catch (f) {
-            printEvent(`File results: ${filelistsError.code} - ${filelistsError.message}`, 'error');
-            printStatusMessage(message, `File results: ${filelistsError.code} - ${filelistsError.message}`, type);
           }
         }
 
-        printEvent(`File results: ${filelistsError.code} - ${filelistsError.message}`, 'error');
-        printStatusMessage(message, `File results: ${filelistsError.code} - ${filelistsError.message}`, type);
+      }
 
+      try {
+        await listShareContent(userResults, fileListResult);
+      } catch (error) {
+        printEvent(`File results: ${error.code} - ${error.message}`, 'error');
+        printStatusMessage(message, `File results: ${error.code} - ${error.message}`, type);
       }
 
 
