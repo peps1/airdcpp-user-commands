@@ -2,10 +2,37 @@
 
 import os from 'os';
 import * as Utils from './utils';
+import fs from 'fs';
+
+// TODO: fix default path
+const SettingDefinitions = [
+  {
+    key: 'output_directory',
+    title: 'Output directory',
+    default_value: '/home/pepsi/.airdc++/extensions/airdcpp-user-commands/output/',
+    type: 'string'
+  }
+];
+
+const CONFIG_VERSION = 1;
+
+// Settings manager docs: https://github.com/airdcpp-web/airdcpp-extension-settings-js
+import SettingsManager from 'airdcpp-extension-settings';
+import { fstat } from 'fs';
 
 // MODULE
 
 export default (socket: any, extension: any) => {
+
+	// INITIALIZATION
+	const settings = SettingsManager(socket, {
+		extensionName: extension.name,
+		configFile: extension.configPath + 'config.json',
+		configVersion: CONFIG_VERSION,
+		definitions: [
+			...SettingDefinitions,
+		],
+	});
 
   const onOutgoingHubMessage = (message: any, accept: any) => {
     const statusMessage = checkChatCommand(message, 'hub');
@@ -193,22 +220,32 @@ export default (socket: any, extension: any) => {
   const onFileListCreated = async (listener: any) => {
     console.log(`File list created: ${listener}`);
   };
-  const onFileListDirectoryDownloadAdded = async (listener: any) => {
-    console.log(`File list Download Added: ${listener}`);
-  };
-  const onFileListDirectoryDownloadRemoved = async (listener: any) => {
-    console.log(`File list Download Removed: ${listener}`);
-  };
-  const onFileListDirectoryDownloadProcessed= async (listener: any) => {
-    console.log(`File list Download Processed: ${listener}`);
-  };
-  const onFileListDirectoryDownloadFailed = async (listener: any) => {
-    console.log(`File list Download Failed: ${listener}`);
-  };
+  // const onFileListDirectoryDownloadAdded = async (listener: any) => {
+  //   console.log(`File list Download Added: ${listener}`);
+  // };
+  // const onFileListDirectoryDownloadRemoved = async (listener: any) => {
+  //   console.log(`File list Download Removed: ${listener}`);
+  // };
+  // const onFileListDirectoryDownloadProcessed= async (listener: any) => {
+  //   console.log(`File list Download Processed: ${listener}`);
+  // };
+  // const onFileListDirectoryDownloadFailed = async (listener: any) => {
+  //   console.log(`File list Download Failed: ${listener}`);
+  // };
 
-  const listShareContent = async (userResults: any, fileListResult: any) => {
+  const listShareContent = async (userResults: any, fileListResult: any, getFileListState=false) => {
+    // When a previous API call failed it is possible `fileListResult` is undefined here, we need to ask the state to make sure the file list was downloaded.
+    if (getFileListState) {
+      fileListResult = await getFileListSessionInfo(userResults);
+    }
+
+    const currentDateTime = Utils.formatDateTime(new Date().toISOString());
+    const outputFileName = `share_list_${userResults[0].nick}-${currentDateTime}`;
+    let items;
+
     // The Download might take a moment, make sure we don't ask the content too early
-    console.log(fileListResult);
+    // TODO: Make sure this doesn't try forever, timeout after 30 seconds
+    console.log(`fileListResult: ${fileListResult}`);
     if (fileListResult.state.id !== 'loaded') {
       let fileListState = 'downloading'
       while (fileListState !== 'loaded') {
@@ -230,6 +267,12 @@ export default (socket: any, extension: any) => {
         console.log(item.name);
       });
     }
+    fs.writeFileSync(`${settings.output_directory}/${outputFileName}`, items, (error: any) => {
+      if (error) {
+        printEvent(`Error writing to file: ${error}`, 'error');
+      }
+    });
+    return fileListResult;
   }
 
   const getFileListItems = async (userResults: any) => {
@@ -246,21 +289,22 @@ export default (socket: any, extension: any) => {
   const listShare = async (message: any, type: string) => {
 
     socket.addListener('filelists', 'filelist_created', onFileListCreated);
-    socket.addListener('filelists', 'filelist_directory_download_added', onFileListDirectoryDownloadAdded);
-    socket.addListener('filelists', 'filelist_directory_download_removed', onFileListDirectoryDownloadRemoved);
-    socket.addListener('filelists', 'filelist_directory_download_processed', onFileListDirectoryDownloadProcessed);
-    socket.addListener('filelists', 'filelist_directory_download_failed', onFileListDirectoryDownloadFailed);
+    // socket.addListener('filelists', 'filelist_directory_download_added', onFileListDirectoryDownloadAdded);
+    // socket.addListener('filelists', 'filelist_directory_download_removed', onFileListDirectoryDownloadRemoved);
+    // socket.addListener('filelists', 'filelist_directory_download_processed', onFileListDirectoryDownloadProcessed);
+    // socket.addListener('filelists', 'filelist_directory_download_failed', onFileListDirectoryDownloadFailed);
+
+    let fileListResult;
 
     // split the command, first should be the username and then the directory to list
     // TODO: remove debug
     printStatusMessage(message, message.text, type);
     const command = message.text.split(' ');
+
     if (command.length >= 3) {
       const username = command[1];
       // The path can have spaces, everything following the Username will be considered as the path
       let listDir = command.slice(2).join(' ');
-      // TODO: remove debug
-      printStatusMessage(message, listDir.slice(-1), type);
       if (listDir !== '/' || listDir.slice(-1) !== '/') {
         listDir = `${listDir}/`;
       }
@@ -270,10 +314,8 @@ export default (socket: any, extension: any) => {
         pattern: username,
         max_results: 1,
       });
-      // TODO: remove debug
       printStatusMessage(message, `For user: "${userResults[0].nick}" Listing ${listDir}`, type);
 
-      let fileListResult;
       try {
         // Try to open the file list of that User
         fileListResult = await socket.post('filelists', {
@@ -295,8 +337,7 @@ export default (socket: any, extension: any) => {
           if (`${listDir}` !== userFileList.location.path) {
             // A file list might be open already, but for another directory
             try {
-              console.log('File list not in correct folder, switching folder.');
-              await socket.post(`filelists/${userResults[0].cid}/directory`, {
+              fileListResult = await socket.post(`filelists/${userResults[0].cid}/directory`, {
                 list_path: `${listDir}`,
                 reload: false,
               });
@@ -307,12 +348,19 @@ export default (socket: any, extension: any) => {
             }
 
           }
+          fileListResult = await listShareContent(userResults, fileListResult, true);
+          printEvent(`Listing done for user '${userResults[0].nick}' and path '${fileListResult.location.path}'`, 'info');
+          printStatusMessage(message, `Listing done for user '${userResults[0].nick}' and path '${fileListResult.location.path}'`, type);
+          return;
         }
 
       }
 
       try {
         await listShareContent(userResults, fileListResult);
+        printEvent(`Listing done for user '${userResults[0].nick}' and path '${fileListResult.location.path}'`, 'info');
+        printStatusMessage(message, `Listing done for user '${userResults[0].nick}' and path '${fileListResult.location.path}'`, type);
+        return;
       } catch (error) {
         printEvent(`File results: ${error.code} - ${error.message}`, 'error');
         printStatusMessage(message, `File results: ${error.code} - ${error.message}`, type);
@@ -321,6 +369,7 @@ export default (socket: any, extension: any) => {
 
     } else {
       printEvent('Missing parameter, needs username and directory path.', 'error');
+      printStatusMessage(message, 'Missing parameter, needs username and directory path.', type);
     }
 
   };
@@ -369,6 +418,8 @@ export default (socket: any, extension: any) => {
   };
 
   extension.onStart = async () => {
+
+    await settings.load();
 
     const subscriberInfo = {
       id: 'user_commands',
