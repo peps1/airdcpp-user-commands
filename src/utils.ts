@@ -43,6 +43,13 @@ export const formatUptime = (seconds: number): string => {
   return dDisplay + hDisplay + mDisplay + sDisplay;
 };
 
+export const formatDateTime = (seconds: string): string => {
+  return seconds.
+    replace(/T/, '_').      // replace T with underscore
+    replace(/\..+/, '').    // delete the dot and everything after
+    replace(/:/g, '')       // remove colons
+};
+
 // Works only for directories
 export const getLastDirectory = (fullPath: string) => {
   const result = fullPath.match(/([^\\/]+)[\\/]$/);
