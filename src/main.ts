@@ -4,25 +4,22 @@ import os from 'os';
 import * as Utils from './utils';
 import fs from 'fs';
 
-// TODO: fix default path
-const SettingDefinitions = [
-  {
-    key: 'output_directory',
-    title: 'Output directory',
-    default_value: '/home/pepsi/.airdc++/extensions/airdcpp-user-commands/output/',
-    type: 'string'
-  }
-];
-
 const CONFIG_VERSION = 1;
 
 // Settings manager docs: https://github.com/airdcpp-web/airdcpp-extension-settings-js
 import SettingsManager from 'airdcpp-extension-settings';
-import { fstat } from 'fs';
 
-// MODULE
 
 export default (socket: any, extension: any) => {
+
+  const SettingDefinitions = [
+    {
+      key: 'output_directory',
+      title: 'Output directory',
+      default_value: extension.logPath + 'output/',
+      type: 'string'
+    }
+  ];
 
 	// INITIALIZATION
 	const settings = SettingsManager(socket, {
@@ -217,87 +214,71 @@ export default (socket: any, extension: any) => {
 
   };
 
-  const onFileListCreated = async (listener: any) => {
-    console.log(`File list created: ${listener}`);
-  };
-  // const onFileListDirectoryDownloadAdded = async (listener: any) => {
-  //   console.log(`File list Download Added: ${listener}`);
-  // };
-  // const onFileListDirectoryDownloadRemoved = async (listener: any) => {
-  //   console.log(`File list Download Removed: ${listener}`);
-  // };
-  // const onFileListDirectoryDownloadProcessed= async (listener: any) => {
-  //   console.log(`File list Download Processed: ${listener}`);
-  // };
-  // const onFileListDirectoryDownloadFailed = async (listener: any) => {
-  //   console.log(`File list Download Failed: ${listener}`);
-  // };
-
-  const listShareContent = async (userResults: any, fileListResult: any, getFileListState=false) => {
-    // When a previous API call failed it is possible `fileListResult` is undefined here, we need to ask the state to make sure the file list was downloaded.
-    if (getFileListState) {
-      fileListResult = await getFileListSessionInfo(userResults);
-    }
-
-    const currentDateTime = Utils.formatDateTime(new Date().toISOString());
-    const outputFileName = `share_list_${userResults[0].nick}-${currentDateTime}`;
-    let items;
-
+  const listShareContent = async (userResults: any, fileListResult: any) => {
     // The Download might take a moment, make sure we don't ask the content too early
     // TODO: Make sure this doesn't try forever, timeout after 30 seconds
-    console.log(`fileListResult: ${fileListResult}`);
+    // TODO: check for failed states
     if (fileListResult.state.id !== 'loaded') {
       let fileListState = 'downloading'
       while (fileListState !== 'loaded') {
-        console.log('Waiting 1 second while filelist is downloading...' + Date.now());
         await Utils.sleep(1000);
         // get the current filelist state
         const fileListSession: any = await getFileListSessionInfo(userResults);
         fileListState = fileListSession.state.id;
       }
-      console.log('Listing Share content now...');
-      const userFilelistItems = await getFileListItems(userResults);
-      userFilelistItems.items.forEach((item: any) => {
-        console.log(item.name);
-      });
-    } else {
-      console.log('Listing Share content now, download was done already...');
-      const userFilelistItems = await getFileListItems(userResults);
-      userFilelistItems.items.forEach((item: any) => {
-        console.log(item.name);
-      });
     }
-    fs.writeFileSync(`${settings.output_directory}/${outputFileName}`, items, (error: any) => {
-      if (error) {
-        printEvent(`Error writing to file: ${error}`, 'error');
-      }
+
+    const userFilelistItems = await getFileListItems(userResults);
+
+    const currentDateTime = Utils.formatDateTime(new Date().toISOString());
+    const outputFolderName = settings.getValue('output_directory');
+    const outputFilePath = `${outputFolderName}/share_list_${userResults[0].nick}-${currentDateTime}.txt`;
+
+
+    // make sure the Output folder exists
+    if (!fs.existsSync(outputFolderName)) {
+      fs.mkdir(outputFolderName, { recursive: true }, (err) => { return err });
+    }
+
+    // Write to file
+    const f = fs.createWriteStream(outputFilePath);
+    f.on('error', (error: any) => {
+      printEvent(`Error writing to file - ${error}`, 'error');
     });
-    return fileListResult;
+    userFilelistItems.items.forEach((item: any) => {
+      f.write(item.name + '\n')
+    })
+    return { fileListResult, outputFilePath }
   }
 
   const getFileListItems = async (userResults: any) => {
-    const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/9999`);
-    return userFilelistItems;
+    try {
+      const userFilelistItems = await socket.get(`filelists/${userResults[0].cid}/items/0/9999`);
+      return userFilelistItems;
+    } catch (e) {
+      printEvent(`File results: ${e.code} - ${e.message}`, 'error');
+      return;
+    }
   }
 
   const getFileListSessionInfo = async (userResults: any) => {
-    const userFilelistSession = await socket.get(`filelists/${userResults[0].cid}`);
-    return userFilelistSession;
+    try {
+      const userFilelistSession = await socket.get(`filelists/${userResults[0].cid}`);
+      return userFilelistSession;
+    } catch (e) {
+      printEvent(`File results: ${e.code} - ${e.message}`, 'error');
+      return;
+    }
   }
 
   // /list command
   const listShare = async (message: any, type: string) => {
 
-    socket.addListener('filelists', 'filelist_created', onFileListCreated);
-    // socket.addListener('filelists', 'filelist_directory_download_added', onFileListDirectoryDownloadAdded);
-    // socket.addListener('filelists', 'filelist_directory_download_removed', onFileListDirectoryDownloadRemoved);
-    // socket.addListener('filelists', 'filelist_directory_download_processed', onFileListDirectoryDownloadProcessed);
-    // socket.addListener('filelists', 'filelist_directory_download_failed', onFileListDirectoryDownloadFailed);
-
     let fileListResult;
+    let lsc;
+    let outputFilePath;
 
     // split the command, first should be the username and then the directory to list
-    // TODO: remove debug
     printStatusMessage(message, message.text, type);
     const command = message.text.split(' ');
 
@@ -314,7 +295,8 @@ export default (socket: any, extension: any) => {
         pattern: username,
         max_results: 1,
       });
-      printStatusMessage(message, `For user: "${userResults[0].nick}" Listing ${listDir}`, type);
+      printStatusMessage(message, `Found user: "${userResults[0].nick}". Trying to list "${listDir}"`, type);
+
 
       try {
         // Try to open the file list of that User
@@ -331,16 +313,17 @@ export default (socket: any, extension: any) => {
         // The file list might be open already
         if (fileListsError.code === 409) {
           // Get the already opened file list
-          const userFileList = await getFileListSessionInfo(userResults);
+          fileListResult = await getFileListSessionInfo(userResults);
 
           // check what folder is used
-          if (`${listDir}` !== userFileList.location.path) {
+          if (`${listDir}` !== fileListResult.location.path) {
             // A file list might be open already, but for another directory
             try {
-              fileListResult = await socket.post(`filelists/${userResults[0].cid}/directory`, {
+              await socket.post(`filelists/${userResults[0].cid}/directory`, {
                 list_path: `${listDir}`,
                 reload: false,
               });
+              fileListResult = await getFileListSessionInfo(userResults);
 
             } catch (error) {
               printEvent(`File results: ${error.code} - ${error.message}`, 'error');
@@ -348,18 +331,24 @@ export default (socket: any, extension: any) => {
             }
 
           }
-          fileListResult = await listShareContent(userResults, fileListResult, true);
-          printEvent(`Listing done for user '${userResults[0].nick}' and path '${fileListResult.location.path}'`, 'info');
-          printStatusMessage(message, `Listing done for user '${userResults[0].nick}' and path '${fileListResult.location.path}'`, type);
+          lsc = await listShareContent(userResults, fileListResult);
+          fileListResult = lsc.fileListResult;
+          outputFilePath = lsc.outputFilePath;
+
+          printEvent(`Listing completed, file written to: ${outputFilePath}`, 'info');
+          printStatusMessage(message, `Listing completed, file written to: ${outputFilePath}`, type);
           return;
         }
 
       }
 
       try {
-        await listShareContent(userResults, fileListResult);
-        printEvent(`Listing done for user '${userResults[0].nick}' and path '${fileListResult.location.path}'`, 'info');
-        printStatusMessage(message, `Listing done for user '${userResults[0].nick}' and path '${fileListResult.location.path}'`, type);
+        lsc = await listShareContent(userResults, fileListResult);
+        fileListResult = lsc.fileListResult;
+        outputFilePath = lsc.outputFilePath;
+
+        printEvent(`Listing completed, file written to: ${outputFilePath}`, 'info');
+        printStatusMessage(message, `Listing completed, file written to: ${outputFilePath}`, type);
         return;
       } catch (error) {
         printEvent(`File results: ${error.code} - ${error.message}`, 'error');
@@ -384,14 +373,14 @@ export default (socket: any, extension: any) => {
     if (text === '/help') {
       return `
 
-    User commands
+        User commands
 
-    /uptime\t\tShow uptime (Client & System)\t\t\t(public, visible to everyone)
-    /stats\t\tShow various stats (Client, Uptime, Ratio, CPU)\t\t\t(public, visible to everyone)
-    /ratio\t\tShow Upload/Download stats\t\t\t(public, visible to everyone)
-    /sratio\t\tShow Session Upload/Download stats\t\t\t(public, visible to everyone)
-    /list username /share/path\t\tShow Session Upload/Download stats\t\t\t(public, visible to everyone)
-    /version\t\tShow user-commands extension version\t\t\t(private, visible only to yourself)
+        /uptime\tShow uptime (Client & System)\t\t\t(public, visible to everyone)
+        /stats\t\tShow various stats (Client, Uptime, Ratio, CPU)\t\t\t(public, visible to everyone)
+        /ratio\t\tShow Upload/Download stats\t\t\t(public, visible to everyone)
+        /sratio\tShow Session Upload/Download stats\t\t\t(public, visible to everyone)
+        /version\tShow user-commands extension version\t\t\t(private, visible only to yourself)
+        /list username /share/folder - List all items within a users shared folder, writing items to local file\t\t\t(private, visible only to yourself)
 
       `;
     } else if (text === '/sratio') {
