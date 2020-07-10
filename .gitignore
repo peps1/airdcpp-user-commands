@@ -7,3 +7,4 @@ npm-debug.log
 /devtools/settings.js
 /devtools/settings
 /devtools/logs
+.nyc_output

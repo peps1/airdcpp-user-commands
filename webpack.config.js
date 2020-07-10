@@ -1,4 +1,5 @@
 var path = require('path');
+const { resolve } = require('path')
 var webpack = require('webpack');
 
 var packageJson = require('./package.json');
@@ -31,7 +32,7 @@ if (!release) {
 
 module.exports = {
   mode: process.env.NODE_ENV === 'production' ? 'production' : 'development',
-  entry: release ? './src/index.js' : './src/main.js',
+  entry: release ? resolve('./src/index.ts') : resolve('./src/main.ts'),
   target: 'node',
   output: {
     path: path.join(__dirname, 'dist'),
@@ -40,12 +41,16 @@ module.exports = {
   },
   plugins: plugins,
   devtool: 'source-map',
+  resolve: {
+    extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"]
+  },
   module: {
     rules: [
       {
-        test: /\.(js)$/,
-        include: /src/,
-        use: 'babel-loader',
+        // Include ts, tsx, js, and jsx files.
+        test: /\.(ts|js)x?$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader',
       }
     ]
   },

@@ -2,17 +2,18 @@ sudo: required
 dist: bionic
 language: node_js
 node_js:
-- stable
-- node
-- 8
+  - 13
+  - 10
+  - 8
 before_install:
-# Update to the latest version as peer dependencies may cause issues otherwise
-- npm install npm -g
+  # Update to the latest version as peer dependencies may cause issues otherwise
+  - npm install npm -g
 script:
-- npm run build
-# - npm test
+  - npm run build
+  - npm test
+  - npm install codecov -g
 notifications:
   email:
     on_failure: change
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
+  - codecov -f coverage/*.json

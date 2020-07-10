@@ -1,12 +1,13 @@
 {
-  "presets": [ 
-    ["@babel/env", {
+  "presets": [
+    [ "@babel/env", {
       "targets": {
-        "node": "0.10"
+        "node": "6"
       },
       "useBuiltIns": "usage",
       "corejs": 3
-    }]
+    }],
+    "@babel/typescript"
   ],
   "plugins": [
     ["@babel/plugin-transform-runtime", {

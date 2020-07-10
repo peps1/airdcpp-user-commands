@@ -10,8 +10,12 @@ const extensionConfig = {
 };
 
 // See https://github.com/airdcpp-web/airdcpp-extension-js for usage information
-RemoteExtension(
-	require(process.argv[2] || '../dist/main.js'),
-	require('./settings.js'),
-	extensionConfig
-);
+try {
+	RemoteExtension(
+		require(process.argv[2] || '../dist/main.js'),
+		require('./settings.js'),
+		extensionConfig
+	);
+} catch (e) {
+	console.log(e);
+}
