@@ -41,7 +41,7 @@
     "@types/source-map-support": "^0.5.2",
     "@typescript-eslint/eslint-plugin": "^3.6.0",
     "@typescript-eslint/parser": "^3.6.0",
-    "airdcpp-extension": "^1.1.0",
+    "airdcpp-extension": "^1.2.0-beta.1",
     "airdcpp-extension-settings": "^1.1.0",
     "babel-loader": "^8.1.0",
     "chai": "^4.2.0",
