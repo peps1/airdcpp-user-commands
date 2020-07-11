@@ -5,7 +5,8 @@
         "node": "6"
       },
       "useBuiltIns": "usage",
-      "corejs": 3
+      "corejs": 3,
+      "modules": false
     }],
     "@babel/typescript"
   ],
