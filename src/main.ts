@@ -5,6 +5,8 @@ import * as Utils from './utils';
 import fs from 'fs';
 
 const CONFIG_VERSION = 1;
+declare const EXTENSION_VERSION: string;
+
 
 // Settings manager docs: https://github.com/airdcpp-web/airdcpp-extension-settings-js
 import SettingsManager from 'airdcpp-extension-settings';
@@ -16,7 +18,7 @@ export default (socket: any, extension: any) => {
     {
       key: 'output_directory',
       title: 'Output directory',
-      default_value: extension.logPath + 'output/',
+      default_value: extension.logPath + 'output',
       type: 'string'
     }
   ];
@@ -207,10 +209,17 @@ export default (socket: any, extension: any) => {
 
   // /version command
   const printVersion = async (message: any, type: string) => {
-    const output = process.env.npm_package_version;
+    let version;
+    if (process.env.npm_package_version) {
+      version = process.env.npm_package_version;
+    } else if (EXTENSION_VERSION) {
+      version = EXTENSION_VERSION;
+    } else {
+      version = 'Couldn\'t define version'
+    }
 
     // sendMessage(message, `Extension Version: ${output}`, type);
-    printStatusMessage(message, `Extension Version: ${output}`, type);
+    printStatusMessage(message, `Extension Version: ${version}`, type);
 
   };
 
