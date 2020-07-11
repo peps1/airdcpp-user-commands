@@ -29,6 +29,11 @@ export const clientUptime = (startTime: number): number => {
   return seconds;
 };
 
+// file path doesn't allow certain characters, so let's strip them
+export const cleanUsername = (username: string): string => {
+  return username.replace(/[/\\?%*:|"<>]/g, '-')
+}
+
 // Format nicely (151 days 18 hours 58 minutes 25 seconds)
 export const formatUptime = (seconds: number): string => {
   const d = Math.floor(seconds / 86400);
