@@ -34,7 +34,7 @@ export default (socket: any, extension: any) => {
 	});
 
   const onOutgoingHubMessage = (message: any, accept: any) => {
-    const statusMessage = checkChatCommand(message, 'hub');
+    const statusMessage = checkLegacyChatCommand(message, 'hub');
     if (statusMessage) {
       printStatusMessage(message, statusMessage, 'hub');
     }
@@ -44,7 +44,7 @@ export default (socket: any, extension: any) => {
   };
 
   const onOutgoingPrivateMessage = (message: any, accept: any) => {
-    const statusMessage = checkChatCommand(message, 'private');
+    const statusMessage = checkLegacyChatCommand(message, 'private');
     if (statusMessage) {
       printStatusMessage(message, statusMessage, 'private');
     }
@@ -281,7 +281,7 @@ export default (socket: any, extension: any) => {
   }
 
   // /list command
-  const listShare = async (message: any, type: string) => {
+  const listShare = async (message: any, type: string, args: any) => {
 
     let fileListResult;
     let lsc;
@@ -289,6 +289,7 @@ export default (socket: any, extension: any) => {
 
     // split the command, first should be the username and then the directory to list
     printStatusMessage(message, message.text, type);
+    printStatusMessage(message, args.toString(), type);
     const command = message.text.split(' ');
 
     if (command.length >= 3) {
@@ -373,7 +374,8 @@ export default (socket: any, extension: any) => {
   };
 
   // Basic chat command handling, returns possible status message to post
-  const checkChatCommand = (message: any, type: string) => {
+  // TODO: (legacy, remove at some point)
+  const checkLegacyChatCommand = (message: any, type: string) => {
     const text = message.text;
     if (text.length === 0 || text[0] !== '/') {
       return null;
@@ -408,14 +410,65 @@ export default (socket: any, extension: any) => {
         printVersion(message, type);
         return null;
     } else if (text.startsWith('/list ')) {
-        listShare(message, type);
+        listShare(message, type, null);
         return null;
     }
 
     return null;
   };
 
-  extension.onStart = async () => {
+  const checkChatCommand = (message: any, type: string, data: any) => {
+		const { command, args } = data;
+
+		switch (command) {
+			case 'help': {
+        return `
+
+        User commands
+
+        /uptime\tShow uptime (Client & System)\t\t\t(public, visible to everyone)
+        /stats\t\tShow various stats (Client, Uptime, Ratio, CPU)\t\t\t(public, visible to everyone)
+        /ratio\t\tShow Upload/Download stats\t\t\t(public, visible to everyone)
+        /sratio\tShow Session Upload/Download stats\t\t\t(public, visible to everyone)
+        /version\tShow user-commands extension version\t\t\t(private, visible only to yourself)
+        /list username /share/folder - List all items within a users shared folder, writing items to local file\t\t\t(private, visible only to yourself)
+
+        `;
+			}
+			case 'stats': {
+        printFullStats(message, type);
+			}
+			case 'ratio': {
+        printRatioTotal(message, type);
+			}
+			case 'sratio': {
+        printRatioSession(message, type);
+			}
+			case 'uptime': {
+        printUptime(message, type);
+			}
+			case 'version': {
+        printVersion(message, type);
+			}
+			case 'list': {
+        listShare(message, type, args);
+			}
+		}
+
+		return null;
+  };
+
+  const onChatCommand = (type: string, message: any, data: any, entityId: number) => {
+		const statusMessage = checkChatCommand(message, type, data);
+		if (statusMessage) {
+			socket.post(`${type}/${entityId}/status_message`, {
+				text: statusMessage,
+				severity: 'info',
+			});
+		}
+	};
+
+  extension.onStart = async (sessionInfo: any) => {
 
     await settings.load();
 
@@ -424,7 +477,12 @@ export default (socket: any, extension: any) => {
       name: 'User commands',
     };
 
-    socket.addHook('hubs', 'hub_outgoing_message_hook', onOutgoingHubMessage, subscriberInfo);
-    socket.addHook('private_chat', 'private_chat_outgoing_message_hook', onOutgoingPrivateMessage, subscriberInfo);
+    if (sessionInfo.system_info.api_feature_level >= 4) {
+			socket.addListener('hubs', 'hub_text_command', onChatCommand.bind(this, 'hubs'));
+      socket.addListener('private_chat', 'private_chat_text_command', onChatCommand.bind(this, 'private_chat'));
+    } else {
+      socket.addHook('hubs', 'hub_outgoing_message_hook', onOutgoingHubMessage, subscriberInfo);
+      socket.addHook('private_chat', 'private_chat_outgoing_message_hook', onOutgoingPrivateMessage, subscriberInfo);
+    }
   };
 };
