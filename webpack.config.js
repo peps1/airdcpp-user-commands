@@ -39,10 +39,11 @@ module.exports = {
     filename: 'main.js',
     libraryTarget: 'umd'
   },
-  plugins: plugins,
+  plugins,
   devtool: 'source-map',
   resolve: {
-    extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js"]
+    extensions: ['.webpack.js', '.web.js', '.ts', '.tsx', '.js'],
+    modules: [ path.join(__dirname, 'node_modules') ]
   },
   module: {
     rules: [
