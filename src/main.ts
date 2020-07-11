@@ -241,7 +241,8 @@ export default (socket: any, extension: any) => {
 
     const currentDateTime = Utils.formatDateTime(new Date().toISOString());
     const outputFolderName = settings.getValue('output_directory');
-    const outputFilePath = `${outputFolderName}/share_list_${userResults[0].nick}-${currentDateTime}.txt`;
+    const username = Utils.cleanUsername(userResults[0].nick)
+    const outputFilePath = `${outputFolderName}/share_list_${username}-${currentDateTime}.txt`;
 
 
     // make sure the Output folder exists
