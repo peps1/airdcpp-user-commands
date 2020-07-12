@@ -1,6 +1,6 @@
 {
   "name": "airdcpp-user-commands",
-  "version": "2.0.0-beta.6",
+  "version": "2.1.0-beta.1",
   "description": "User commands to show information in chat",
   "license": "MIT",
   "author": {
@@ -36,7 +36,7 @@
     "@babel/runtime": "^7.10.4",
     "@types/chai": "^4.2.11",
     "@types/mocha": "^7.0.2",
-    "@types/node": "^13.13.13",
+    "@types/node": "^13.13.14",
     "@types/sinon": "^7.5.2",
     "@types/source-map-support": "^0.5.2",
     "@typescript-eslint/eslint-plugin": "^3.6.0",
@@ -62,7 +62,8 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
-    "airdcpp-extension": "^1.2.0-beta.1",
+    "airdcpp-apisocket": "^2.3.0",
+    "airdcpp-extension": "^1.2.0",
     "airdcpp-extension-settings": "^1.1.0"
   },
   "main": "dist/main",
