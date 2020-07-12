@@ -3,8 +3,10 @@
 import os from 'os';
 import * as Utils from './utils';
 import fs from 'fs';
-
+import type { APISocket } from 'airdcpp-apisocket';
 const CONFIG_VERSION = 1;
+
+// This will be populated with version from webpack
 declare const EXTENSION_VERSION: string;
 
 
@@ -12,8 +14,9 @@ declare const EXTENSION_VERSION: string;
 import SettingsManager from 'airdcpp-extension-settings';
 
 
-export default (socket: any, extension: any) => {
+export default (socket: APISocket, extension: any) => {
 
+  // Default settings
   const SettingDefinitions = [
     {
       key: 'output_directory',
@@ -33,53 +36,37 @@ export default (socket: any, extension: any) => {
 		],
 	});
 
-  const onOutgoingHubMessage = (message: any, accept: any) => {
-    const statusMessage = checkLegacyChatCommand(message, 'hub');
-    if (statusMessage) {
-      printStatusMessage(message, statusMessage, 'hub');
-    }
 
-    accept();
-
-  };
-
-  const onOutgoingPrivateMessage = (message: any, accept: any) => {
-    const statusMessage = checkLegacyChatCommand(message, 'private');
-    if (statusMessage) {
-      printStatusMessage(message, statusMessage, 'private');
-    }
-
-    accept();
-
-  };
-
-  // Send a status message that is only shown locally in this chat session.
   // https://airdcpp.docs.apiary.io/#reference/private-chat-sessions/methods/send-status-message
   // https://airdcpp.docs.apiary.io/#reference/hub-sessions/messages/send-status-message
-  const printStatusMessage = (message: any, statusMessage: string, type: string) => {
-    if (type === 'hub') {
-      try {
-        socket.post('hubs/status_message', {
-          hub_urls: [ message.hub_url ],
-          text: statusMessage,
-          severity: 'info',
-        });
-      } catch (e) {
-        printEvent(`Failed to send: ${e}`, 'error');
-      }
-    } else {
-      try {
-        socket.post(`private_chat/${message.user.cid}/status_message`, {
-          hub_urls: [ message.hub_url ],
-          text: statusMessage,
-          severity: 'info',
-        });
-      } catch (e) {
-        printEvent(`Failed to send: ${e}`, 'error');
-      }
+  const printStatusMessage = (statusMessage: string, type: string, entityId: number) => {
+    try {
+      socket.post(`${type}/${entityId}/status_message`, {
+        text: statusMessage,
+        severity: 'info',
+      });
+    } catch (e) {
+      printEvent(`Failed to send: ${e}`, 'error');
     }
 
   };
+
+  // https://airdcpp.docs.apiary.io/#reference/hub-sessions/messages/send-chat-message
+  // https://airdcpp.docs.apiary.io/#reference/private-chat-sessions/methods/send-chat-message
+  const sendChatMessage = (chatMessage: string, type: string, entityId: number) => {
+    // TODO: remove logging
+    console.log(chatMessage + type + entityId);
+    try {
+      socket.post(`${type}/${entityId}/chat_message`, {
+        text: chatMessage,
+        severity: 'info',
+      });
+    } catch (e) {
+      printEvent(`Failed to send: ${e}`, 'error');
+    }
+
+  };
+
 
   // Events are used for displaying and logging informative messages and errors to the application user.
   // Note that events are not bind to any specific context; some entities, such as hubs, provide similar
@@ -93,40 +80,9 @@ export default (socket: any, extension: any) => {
     });
   };
 
-  const sendMessage = async (message: any, output: string, type: string) => {
-
-    if (type === 'hub') {
-
-      try {
-        socket.post('hubs/chat_message', {
-          hub_urls: [message.hub_url],
-          text: output,
-        });
-
-      } catch (e) {
-        printEvent(`Failed to send: ${e}`, 'error');
-      }
-
-    } else {
-
-      try {
-        socket.post('private_chat/chat_message', {
-          user: {
-            hub_url: message.user.hub_url,
-            cid: message.user.cid,
-          },
-          text: output,
-          echo: true,
-        });
-      } catch (e) {
-        printEvent(`Failed to send: ${e}`, 'error');
-      }
-
-    }
-  };
 
   const getRatio = async () => {
-    const results = await socket.get('transfers/tranferred_bytes');
+    const results: any = await socket.get('transfers/tranferred_bytes');
 
     // Total Stats
     // For some reason the start_total_* values are not beeing updated after the client starts
@@ -152,26 +108,26 @@ export default (socket: any, extension: any) => {
   };
 
   // /sratio command
-  const printRatioSession = async (message: any, type: string) => {
+  const printRatioSession = async (type: string, entityId: number) => {
     const ratio = await getRatio();
     const output = `Ratio Session: ${ratio.session_ratio} (Uploaded: ${ratio.session_uploaded} | Downloaded: ${ratio.session_downloaded} )`;
 
-    sendMessage(message, output, type);
+    sendChatMessage(output, type, entityId);
 
   };
 
   // /ratio command
-  const printRatioTotal = async (message: any, type: string) => {
+  const printRatioTotal = async (type: string, entityId: number) => {
     const ratio = await getRatio();
     const output = `Ratio Total: ${ratio.total_ratio} (Uploaded: ${ratio.total_uploaded} | Downloaded: ${ratio.total_downloaded} )`;
 
-    sendMessage(message, output, type);
+    sendChatMessage(output, type, entityId);
 
   };
 
   // /stats command
-  const printFullStats = async (message: any, type: string) => {
-    const sysinfoResults = await socket.get('system/system_info');
+  const printFullStats = async (type: string, entityId: number) => {
+    const sysinfoResults: any = await socket.get('system/system_info');
     const uptime = sysinfoResults.client_started;
     const clientv = sysinfoResults.client_version;
     const osInfoResult = Utils.getOsInfo();
@@ -187,7 +143,8 @@ export default (socket: any, extension: any) => {
   -=[ CPU: ${os.cpus()[0].model} ]=-
     `;
 
-    sendMessage(message, output, type);
+    sendChatMessage(output, type, entityId);
+
     if (osInfoErr.length !== 0) {
       printEvent(`Error when getting OS info: ${osInfoErr}`, 'error');
     }
@@ -195,20 +152,20 @@ export default (socket: any, extension: any) => {
   };
 
   // /uptime command
-  const printUptime = async (message: any, type: string) => {
-    const results = await socket.get('system/system_info');
+  const printUptime = async (type: string, entityId: number) => {
+    const results: any = await socket.get('system/system_info');
     const uptime = results.client_started;
     const output = `
 -=[ Uptime: ${Utils.formatUptime(Utils.clientUptime(uptime))} ]=-
 -=[ System Uptime: ${Utils.formatUptime(os.uptime())} ]=-
     `;
 
-    sendMessage(message, output, type);
+    sendChatMessage(output, type, entityId);
 
   };
 
   // /version command
-  const printVersion = async (message: any, type: string) => {
+  const printVersion = async (type: string, entityId: number) => {
     let version;
     if (process.env.npm_package_version) {
       version = process.env.npm_package_version;
@@ -219,7 +176,7 @@ export default (socket: any, extension: any) => {
     }
 
     // sendMessage(message, `Extension Version: ${output}`, type);
-    printStatusMessage(message, `Extension Version: ${version}`, type);
+    printStatusMessage(`Extension Version: ${version}`, type, entityId);
 
   };
 
@@ -237,7 +194,7 @@ export default (socket: any, extension: any) => {
       }
     }
 
-    const userFilelistItems = await getFileListItems(userResults);
+    const userFilelistItems: any = await getFileListItems(userResults);
 
     const currentDateTime = Utils.formatDateTime(new Date().toISOString());
     const outputFolderName = settings.getValue('output_directory');
@@ -282,31 +239,26 @@ export default (socket: any, extension: any) => {
   }
 
   // /list command
-  const listShare = async (message: any, type: string, args: any) => {
+  const listShare = async (type: string, entityId: number, args: any) => {
 
-    let fileListResult;
-    let lsc;
-    let outputFilePath;
+    let fileListResult: any;
+    let lsc: any;
+    let outputFilePath: string;
 
-    // split the command, first should be the username and then the directory to list
-    printStatusMessage(message, message.text, type);
-    printStatusMessage(message, args.toString(), type);
-    const command = message.text.split(' ');
-
-    if (command.length >= 3) {
-      const username = command[1];
+    if (args.length >= 2) {
+      const username = args[0];
       // The path can have spaces, everything following the Username will be considered as the path
-      let listDir = command.slice(2).join(' ');
+      let listDir = args.slice(1).join(' ');
       if (listDir !== '/' || listDir.slice(-1) !== '/') {
         listDir = `${listDir}/`;
       }
       // search for the closest match with that username
       // TODO: check if username matches at all
-      const userResults = await socket.post('users/search_nicks', {
+      const userResults: any = await socket.post('users/search_nicks', {
         pattern: username,
         max_results: 1,
       });
-      printStatusMessage(message, `Found user: "${userResults[0].nick}". Trying to list "${listDir}"`, type);
+      printStatusMessage(`Found user: "${userResults[0].nick}". Trying to list "${listDir}"`, type, entityId);
 
 
       try {
@@ -338,7 +290,7 @@ export default (socket: any, extension: any) => {
 
             } catch (error) {
               printEvent(`File results: ${error.code} - ${error.message}`, 'error');
-              printStatusMessage(message, `File results: ${error.code} - ${error.message}`, type);
+              printStatusMessage(`File results: ${error.code} - ${error.message}`, type, entityId);
             }
 
           }
@@ -347,7 +299,7 @@ export default (socket: any, extension: any) => {
           outputFilePath = lsc.outputFilePath;
 
           printEvent(`Listing completed, file written to: ${outputFilePath}`, 'info');
-          printStatusMessage(message, `Listing completed, file written to: ${outputFilePath}`, type);
+          printStatusMessage(`Listing completed, file written to: ${outputFilePath}`, type, entityId);
           return;
         }
 
@@ -359,17 +311,17 @@ export default (socket: any, extension: any) => {
         outputFilePath = lsc.outputFilePath;
 
         printEvent(`Listing completed, file written to: ${outputFilePath}`, 'info');
-        printStatusMessage(message, `Listing completed, file written to: ${outputFilePath}`, type);
+        printStatusMessage(`Listing completed, file written to: ${outputFilePath}`, type, entityId);
         return;
       } catch (error) {
         printEvent(`File results: ${error.code} - ${error.message}`, 'error');
-        printStatusMessage(message, `File results: ${error.code} - ${error.message}`, type);
+        printStatusMessage(`File results: ${error.code} - ${error.message}`, type, entityId);
       }
 
 
     } else {
       printEvent('Missing parameter, needs username and directory path.', 'error');
-      printStatusMessage(message, 'Missing parameter, needs username and directory path.', type);
+      printStatusMessage('Missing parameter, needs username and directory path.', type, entityId);
     }
 
   };
@@ -382,8 +334,11 @@ export default (socket: any, extension: any) => {
       return null;
     }
 
+    const command = message.text.split(' ');
+    const args = command.slice(1);
+
     if (text === '/help') {
-      return `
+      const helpText = `
 
         User commands
 
@@ -394,32 +349,35 @@ export default (socket: any, extension: any) => {
         /version\tShow user-commands extension version\t\t\t(private, visible only to yourself)
         /list username /share/folder - List all items within a users shared folder, writing items to local file\t\t\t(private, visible only to yourself)
 
-      `;
+      `
+      sendChatMessage(helpText, type, message.session_id)
     } else if (text === '/sratio') {
-        printRatioSession(message, type);
+        printRatioSession(type, message.session_id);
         return null;
     } else if (text === '/ratio') {
-        printRatioTotal(message, type);
+        printRatioTotal(type, message.session_id);
         return null;
     } else if (text === '/stats') {
-        printFullStats(message, type);
+        printFullStats(type, message.session_id);
         return null;
     } else if (text === '/uptime') {
-        printUptime(message, type);
+        printUptime(type, message.session_id);
         return null;
     } else if (text === '/version') {
-        printVersion(message, type);
+        printVersion(type, message.session_id);
         return null;
     } else if (text.startsWith('/list ')) {
-        listShare(message, type, null);
+        listShare(type, message.session_id, args);
         return null;
     }
 
     return null;
   };
 
-  const checkChatCommand = (message: any, type: string, data: any) => {
-		const { command, args } = data;
+  // entityId is the session_id used to reference the current chat session
+  // example https://airdcpp.docs.apiary.io/#reference/private-chat-sessions/methods/send-chat-message
+  const checkChatCommand = (type: string, data: any, entityId: number) => {
+    const { command, args } = data;
 
 		switch (command) {
 			case 'help': {
@@ -437,37 +395,49 @@ export default (socket: any, extension: any) => {
         `;
 			}
 			case 'stats': {
-        printFullStats(message, type);
+        printFullStats(type, entityId);
 			}
 			case 'ratio': {
-        printRatioTotal(message, type);
+        printRatioTotal(type, entityId);
 			}
 			case 'sratio': {
-        printRatioSession(message, type);
+        printRatioSession(type, entityId);
 			}
 			case 'uptime': {
-        printUptime(message, type);
+        printUptime(type, entityId);
 			}
 			case 'version': {
-        printVersion(message, type);
+        printVersion(type, entityId);
 			}
 			case 'list': {
-        listShare(message, type, args);
+        listShare(type, entityId, args);
 			}
 		}
 
 		return null;
   };
 
-  const onChatCommand = (type: string, message: any, data: any, entityId: number) => {
-		const statusMessage = checkChatCommand(message, type, data);
+  const onChatCommand = (type: string, data: any, entityId: number) => {
+		const statusMessage = checkChatCommand(type, data, entityId);
 		if (statusMessage) {
-			socket.post(`${type}/${entityId}/status_message`, {
-				text: statusMessage,
-				severity: 'info',
-			});
+      printStatusMessage(statusMessage, type, entityId);
 		}
-	};
+  };
+
+  const onOutgoingHubMessage = (message: any, accept: any) => {
+    checkLegacyChatCommand(message, 'hubs');
+
+    accept();
+
+  };
+
+  const onOutgoingPrivateMessage = (message: any, accept: any) => {
+    checkLegacyChatCommand(message, 'private');
+
+    accept();
+
+  };
+
 
   extension.onStart = async (sessionInfo: any) => {
 
@@ -479,7 +449,7 @@ export default (socket: any, extension: any) => {
     };
 
     if (sessionInfo.system_info.api_feature_level >= 4) {
-			socket.addListener('hubs', 'hub_text_command', onChatCommand.bind(this, 'hubs'));
+      socket.addListener('hubs', 'hub_text_command', onChatCommand.bind(this, 'hubs'));
       socket.addListener('private_chat', 'private_chat_text_command', onChatCommand.bind(this, 'private_chat'));
     } else {
       socket.addHook('hubs', 'hub_outgoing_message_hook', onOutgoingHubMessage, subscriberInfo);
