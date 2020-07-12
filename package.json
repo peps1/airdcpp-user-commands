@@ -23,7 +23,7 @@
     "clean": "rimraf dist",
     "dev": "ts-node-dev --respawn --transpileOnly ./src/main.ts",
     "start": "node devtools/watch.js ../dist/main.js",
-    "test": "nyc mocha -r ts-node/register tests/*.ts",
+    "test": "nyc mocha -r ts-node/register src/tests/*.ts",
     "posttest": "nyc report --reporter=json",
     "prepublishOnly": "npm run build",
     "webpack": "webpack"
@@ -71,5 +71,10 @@
   "airdcpp": {
     "apiVersion": 1,
     "minApiFeatureLevel": 0
+  },
+  "nyc": {
+    "exclude": [
+      "src/tests/"
+    ]
   }
 }
