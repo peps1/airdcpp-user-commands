@@ -348,7 +348,7 @@ export default (socket: APISocket, extension: any) => {
         /list username /share/folder - List all items within a users shared folder, writing items to local file\t\t\t(private, visible only to yourself)
 
       `
-      sendChatMessage(helpText, type, message.session_id)
+      printStatusMessage(helpText, type, message.session_id)
     } else if (text === '/sratio') {
         printRatioSession(type, message.session_id);
         return null;
@@ -379,7 +379,7 @@ export default (socket: APISocket, extension: any) => {
 
 		switch (command) {
 			case 'help': {
-        return `
+        const helpText = `
 
         User commands
 
@@ -391,24 +391,32 @@ export default (socket: APISocket, extension: any) => {
         /list username /share/folder - List all items within a users shared folder, writing items to local file\t\t\t(private, visible only to yourself)
 
         `;
+        printStatusMessage(helpText, type, entityId)
+        break;
 			}
 			case 'stats': {
         printFullStats(type, entityId);
+        break;
 			}
 			case 'ratio': {
         printRatioTotal(type, entityId);
+        break;
 			}
 			case 'sratio': {
         printRatioSession(type, entityId);
+        break;
 			}
 			case 'uptime': {
         printUptime(type, entityId);
+        break;
 			}
 			case 'version': {
         printVersion(type, entityId);
+        break;
 			}
 			case 'list': {
         listShare(type, entityId, args);
+        break;
 			}
 		}
 
@@ -445,7 +453,6 @@ export default (socket: APISocket, extension: any) => {
       id: 'user_commands',
       name: 'User commands',
     };
-
     if (sessionInfo.system_info.api_feature_level >= 4) {
       socket.addListener('hubs', 'hub_text_command', onChatCommand.bind(null, 'hubs'));
       socket.addListener('private_chat', 'private_chat_text_command', onChatCommand.bind(null, 'private_chat'));
