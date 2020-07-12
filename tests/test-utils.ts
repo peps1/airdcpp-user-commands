@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { describe, it } from 'mocha';
 import sinon from 'sinon';
 
-import { clientUptime } from '../utils';
+import { clientUptime } from '../src/utils';
 
 describe('clientUptime', () => {
   it('Should return 4322 seconds', () => {
