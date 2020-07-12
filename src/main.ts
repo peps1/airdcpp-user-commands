@@ -39,7 +39,7 @@ export default (socket: APISocket, extension: any) => {
 
   // https://airdcpp.docs.apiary.io/#reference/private-chat-sessions/methods/send-status-message
   // https://airdcpp.docs.apiary.io/#reference/hub-sessions/messages/send-status-message
-  const printStatusMessage = (statusMessage: string, type: string, entityId: number) => {
+  const printStatusMessage = (statusMessage: string, type: string, entityId: string|number) => {
     try {
       socket.post(`${type}/${entityId}/status_message`, {
         text: statusMessage,
@@ -53,9 +53,7 @@ export default (socket: APISocket, extension: any) => {
 
   // https://airdcpp.docs.apiary.io/#reference/hub-sessions/messages/send-chat-message
   // https://airdcpp.docs.apiary.io/#reference/private-chat-sessions/methods/send-chat-message
-  const sendChatMessage = (chatMessage: string, type: string, entityId: number) => {
-    // TODO: remove logging
-    console.log(chatMessage + type + entityId);
+  const sendChatMessage = (chatMessage: string, type: string, entityId: string|number) => {
     try {
       socket.post(`${type}/${entityId}/chat_message`, {
         text: chatMessage,
@@ -108,7 +106,7 @@ export default (socket: APISocket, extension: any) => {
   };
 
   // /sratio command
-  const printRatioSession = async (type: string, entityId: number) => {
+  const printRatioSession = async (type: string, entityId: string|number) => {
     const ratio = await getRatio();
     const output = `Ratio Session: ${ratio.session_ratio} (Uploaded: ${ratio.session_uploaded} | Downloaded: ${ratio.session_downloaded} )`;
 
@@ -117,7 +115,7 @@ export default (socket: APISocket, extension: any) => {
   };
 
   // /ratio command
-  const printRatioTotal = async (type: string, entityId: number) => {
+  const printRatioTotal = async (type: string, entityId: string|number) => {
     const ratio = await getRatio();
     const output = `Ratio Total: ${ratio.total_ratio} (Uploaded: ${ratio.total_uploaded} | Downloaded: ${ratio.total_downloaded} )`;
 
@@ -126,7 +124,7 @@ export default (socket: APISocket, extension: any) => {
   };
 
   // /stats command
-  const printFullStats = async (type: string, entityId: number) => {
+  const printFullStats = async (type: string, entityId: string|number) => {
     const sysinfoResults: any = await socket.get('system/system_info');
     const uptime = sysinfoResults.client_started;
     const clientv = sysinfoResults.client_version;
@@ -152,7 +150,7 @@ export default (socket: APISocket, extension: any) => {
   };
 
   // /uptime command
-  const printUptime = async (type: string, entityId: number) => {
+  const printUptime = async (type: string, entityId: string|number) => {
     const results: any = await socket.get('system/system_info');
     const uptime = results.client_started;
     const output = `
@@ -165,7 +163,7 @@ export default (socket: APISocket, extension: any) => {
   };
 
   // /version command
-  const printVersion = async (type: string, entityId: number) => {
+  const printVersion = async (type: string, entityId: string|number) => {
     let version;
     if (process.env.npm_package_version) {
       version = process.env.npm_package_version;
@@ -239,7 +237,7 @@ export default (socket: APISocket, extension: any) => {
   }
 
   // /list command
-  const listShare = async (type: string, entityId: number, args: any) => {
+  const listShare = async (type: string, entityId: string|number, args: any) => {
 
     let fileListResult: any;
     let lsc: any;
@@ -376,7 +374,7 @@ export default (socket: APISocket, extension: any) => {
 
   // entityId is the session_id used to reference the current chat session
   // example https://airdcpp.docs.apiary.io/#reference/private-chat-sessions/methods/send-chat-message
-  const checkChatCommand = (type: string, data: any, entityId: number) => {
+  const checkChatCommand = (type: string, data: any, entityId: string|number) => {
     const { command, args } = data;
 
 		switch (command) {
@@ -417,7 +415,7 @@ export default (socket: APISocket, extension: any) => {
 		return null;
   };
 
-  const onChatCommand = (type: string, data: any, entityId: number) => {
+  const onChatCommand = (type: string, data: any, entityId: string|number) => {
 		const statusMessage = checkChatCommand(type, data, entityId);
 		if (statusMessage) {
       printStatusMessage(statusMessage, type, entityId);
@@ -449,8 +447,8 @@ export default (socket: APISocket, extension: any) => {
     };
 
     if (sessionInfo.system_info.api_feature_level >= 4) {
-      socket.addListener('hubs', 'hub_text_command', onChatCommand.bind(this, 'hubs'));
-      socket.addListener('private_chat', 'private_chat_text_command', onChatCommand.bind(this, 'private_chat'));
+      socket.addListener('hubs', 'hub_text_command', onChatCommand.bind(null, 'hubs'));
+      socket.addListener('private_chat', 'private_chat_text_command', onChatCommand.bind(null, 'private_chat'));
     } else {
       socket.addHook('hubs', 'hub_outgoing_message_hook', onOutgoingHubMessage, subscriberInfo);
       socket.addHook('private_chat', 'private_chat_outgoing_message_hook', onOutgoingPrivateMessage, subscriberInfo);
