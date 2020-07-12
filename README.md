@@ -2,6 +2,9 @@
 
 Extension to run commands to output information.
 
+- [Bug tracker](https://github.com/peps1/airdcpp-user-commands/issues)
+- [Changelog](https://github.com/peps1/airdcpp-user-commands/blob/master/CHANGELOG.md)
+
 ## Screenshot
 
 ![Output](doc/commands_output.png?raw=true "Output")
@@ -19,7 +22,6 @@ Extension to run commands to output information.
 
 ## Resources
 
-- [Bug tracker](https://github.com/peps1/airdcpp-user-commands/issues)
 - [AirDC++ Web API reference](https://airdcpp.docs.apiary.io/)
 
 [build-badge]: https://img.shields.io/travis/peps1/airdcpp-user-commands/master.svg?style=flat-square
