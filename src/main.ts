@@ -416,6 +416,12 @@ export default (socket: APISocket, extension: any) => {
     } else if (text === '/uptime') {
         printUptime(type, message.session_id);
         return null;
+    } else if (text === '/speed') {
+        const speedInfo = await printNetworkSpeedInfo();
+        if (speedInfo) {
+          sendChatMessage(speedInfo, type, message.session_id);
+        }
+        return null;
     } else if (text === '/os') {
         const osInfo = await printOsInfo();
         if (osInfo) {
@@ -481,8 +487,7 @@ export default (socket: APISocket, extension: any) => {
       case 'speed': {
         const speedInfo = await printNetworkSpeedInfo();
         if (speedInfo) {
-          // sendChatMessage(speedInfo, type, entityId);
-          printStatusMessage(speedInfo, type, entityId);
+          sendChatMessage(speedInfo, type, entityId);
         }
         break;
       }
