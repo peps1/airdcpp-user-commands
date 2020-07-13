@@ -2,6 +2,7 @@
 
 import ChildProcess from 'child_process';
 import os from 'os';
+import bytes from 'bytes';
 
 const byteUnits = ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
@@ -32,6 +33,10 @@ export const clientUptime = (startTime: number): number => {
 // file path doesn't allow certain characters, so let's strip them
 export const cleanUsername = (username: string): string => {
   return username.replace(/[/\\?%*:|"<>]/g, '-')
+}
+
+export const formatNetSpeed = (byte: number): string => {
+  return bytes(byte, {decimalPlaces: 2})
 }
 
 // Format nicely (151 days 18 hours 58 minutes 25 seconds)

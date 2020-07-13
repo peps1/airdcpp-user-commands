@@ -9,6 +9,9 @@ const CONFIG_VERSION = 1;
 // This will be populated with version from webpack
 declare const EXTENSION_VERSION: string;
 
+// global variables
+let transferStats: any = [];
+
 
 // Settings manager docs: https://github.com/airdcpp-web/airdcpp-extension-settings-js
 import SettingsManager from 'airdcpp-extension-settings';
@@ -157,6 +160,47 @@ export default (socket: APISocket, extension: any) => {
       return;
     } else {
       return `-=[ OS: ${osInfoResult[0]} ]=-`;
+    }
+  };
+
+  // /os command
+
+  const onTransferStats = (data: (string|number)[]) => {
+    transferStats.push(data)
+  }
+
+  const printNetworkSpeedInfo = async () => {
+    const removeTransferStatsListener = await socket.addListener('transfers', 'transfer_statistics', onTransferStats);
+
+    // Wait for the events to come in and pobulate transferStats
+    let timeWaiting = 0;
+    while (!transferStats[0] || timeWaiting >= 5000) {
+      await Utils.sleep(100);
+      timeWaiting = timeWaiting + 100
+    }
+
+    removeTransferStatsListener();
+    if (transferStats[0]) {
+      printEvent(`Waited: ${timeWaiting} ms`, 'info');
+      let speedUp = transferStats[0].speed_up
+      let speedDown = transferStats[0].speed_down
+
+      if (!speedDown) {speedDown = 0};
+      if (!speedUp) {speedUp = 0};
+      const output = `-=[ Network Speed ][ Downloading: ${Utils.formatNetSpeed(speedDown)}/s ][ Uploading: ${Utils.formatNetSpeed(speedUp)}/s ]=-`;
+
+      // Reset variables for next command
+      timeWaiting = 0
+      transferStats = [];
+
+      return output;
+
+    } else {
+      printEvent(`Error when getting Speed statistics, waited ${timeWaiting/1000} seconds`, 'error');
+      // Reset variables for next command
+      timeWaiting = 0
+      transferStats = [];
+      return;
     }
   };
 
@@ -431,6 +475,14 @@ export default (socket: APISocket, extension: any) => {
         const osInfo = await printOsInfo();
         if (osInfo) {
           sendChatMessage(osInfo, type, entityId);
+        }
+        break;
+      }
+      case 'speed': {
+        const speedInfo = await printNetworkSpeedInfo();
+        if (speedInfo) {
+          // sendChatMessage(speedInfo, type, entityId);
+          printStatusMessage(speedInfo, type, entityId);
         }
         break;
       }
