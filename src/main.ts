@@ -149,6 +149,17 @@ export default (socket: APISocket, extension: any) => {
 
   };
 
+  // /os command
+  const printOsInfo = async () => {
+    const osInfoResult = Utils.getOsInfo();
+    if (osInfoResult[1].length !== 0) {
+      printEvent(`Error when getting OS info: ${osInfoResult[1]}`, 'error');
+      return;
+    } else {
+      return `-=[ OS: ${osInfoResult[0]} ]=-`;
+    }
+  };
+
   // /uptime command
   const printUptime = async (type: string, entityId: string|number) => {
     const results: any = await socket.get('system/system_info');
@@ -326,7 +337,7 @@ export default (socket: APISocket, extension: any) => {
 
   // Basic chat command handling, returns possible status message to post
   // TODO: (legacy, remove at some point)
-  const checkLegacyChatCommand = (message: any, type: string) => {
+  const checkLegacyChatCommand = async (message: any, type: string) => {
     const text = message.text;
     if (text.length === 0 || text[0] !== '/') {
       return null;
@@ -361,6 +372,12 @@ export default (socket: APISocket, extension: any) => {
     } else if (text === '/uptime') {
         printUptime(type, message.session_id);
         return null;
+    } else if (text === '/os') {
+        const osInfo = await printOsInfo();
+        if (osInfo) {
+          sendChatMessage(osInfo, type, message.session_id);
+        }
+        return null;
     } else if (text === '/version') {
         printVersion(type, message.session_id);
         return null;
@@ -374,7 +391,7 @@ export default (socket: APISocket, extension: any) => {
 
   // entityId is the session_id used to reference the current chat session
   // example https://airdcpp.docs.apiary.io/#reference/private-chat-sessions/methods/send-chat-message
-  const checkChatCommand = (type: string, data: any, entityId: string|number) => {
+  const checkChatCommand = async (type: string, data: any, entityId: string|number) => {
     const { command, args } = data;
 
 		switch (command) {
@@ -409,7 +426,14 @@ export default (socket: APISocket, extension: any) => {
 			case 'uptime': {
         printUptime(type, entityId);
         break;
-			}
+      }
+      case 'os': {
+        const osInfo = await printOsInfo();
+        if (osInfo) {
+          sendChatMessage(osInfo, type, entityId);
+        }
+        break;
+      }
 			case 'version': {
         printVersion(type, entityId);
         break;
@@ -423,8 +447,8 @@ export default (socket: APISocket, extension: any) => {
 		return null;
   };
 
-  const onChatCommand = (type: string, data: any, entityId: string|number) => {
-		const statusMessage = checkChatCommand(type, data, entityId);
+  const onChatCommand = async (type: string, data: any, entityId: string|number) => {
+		const statusMessage = await checkChatCommand(type, data, entityId);
 		if (statusMessage) {
       printStatusMessage(statusMessage, type, entityId);
 		}

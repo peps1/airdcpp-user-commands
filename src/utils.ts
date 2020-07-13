@@ -64,9 +64,9 @@ export const getLastDirectory = (fullPath: string) => {
 // Extracting OS info
 // Windows: Microsoft Windows 10.0.19041.1
 // Linux: Debian GNU/Linux 10 (buster) / Ubuntu 18.04.3 LTS
-export const getOsInfo = () => {
+export const getOsInfo = (): any[] => {
   let osInfo;
-  const errors = [];
+  const errors: (string | number)[] = [];
 
   if (os.platform() === 'win32') {
     const winVer = ChildProcess
