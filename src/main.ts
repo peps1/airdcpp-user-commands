@@ -396,6 +396,8 @@ export default (socket: APISocket, extension: any) => {
         User commands
 
         /uptime\tShow uptime (Client & System)\t\t\t(public, visible to everyone)
+        /speed\tShow current network Upload/Download speed\t\t\t(public, visible to everyone)
+        /os\t\tShow the operating system\t\t\t(public, visible to everyone)
         /stats\t\tShow various stats (Client, Uptime, Ratio, CPU)\t\t\t(public, visible to everyone)
         /ratio\t\tShow Upload/Download stats\t\t\t(public, visible to everyone)
         /sratio\tShow Session Upload/Download stats\t\t\t(public, visible to everyone)
@@ -451,6 +453,8 @@ export default (socket: APISocket, extension: any) => {
         User commands
 
         /uptime\tShow uptime (Client & System)\t\t\t(public, visible to everyone)
+        /speed\tShow current network Upload/Download speed\t\t\t(public, visible to everyone)
+        /os\t\tShow the operating system\t\t\t(public, visible to everyone)
         /stats\t\tShow various stats (Client, Uptime, Ratio, CPU)\t\t\t(public, visible to everyone)
         /ratio\t\tShow Upload/Download stats\t\t\t(public, visible to everyone)
         /sratio\tShow Session Upload/Download stats\t\t\t(public, visible to everyone)

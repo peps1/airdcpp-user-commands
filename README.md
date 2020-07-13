@@ -12,8 +12,10 @@ Extension to run commands to output information.
 ## Available Commands
 
 | Command | Description | Visibility |
-| :--- | :--- | :--- |
+| :---    | :--- | :--- |
 | /uptime | Show uptime (Client & System) | (public, visible to everyone) |
+| /speed  | Show current network Upload/Download speed | (public, visible to everyone) |
+| /os     | Show the operating system | (public, visible to everyone) |
 | /stats  | Show various stats (Client, Uptime, Ratio, CPU)| (public, visible to everyone) |
 | /ratio  | Show Upload/Download stats| (public, visible to everyone) |
 | /sratio | Show Session Upload/Download stats| (public, visible to everyone) |
