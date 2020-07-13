@@ -27,7 +27,6 @@ jobs:
         CI: true
 
   publish:
-    if: ${{ github.ref == 'master' }}
     needs: build
     runs-on: ubuntu-latest
     steps:
