@@ -159,7 +159,7 @@ export default (socket: APISocket, extension: any) => {
       printEvent(`Error when getting OS info: ${osInfoResult[1]}`, 'error');
       return;
     } else {
-      return `-=[ OS: ${osInfoResult[0]} ]=-`;
+      return `-=[ Operating system: ${osInfoResult[0]} ]=-`;
     }
   };
 
