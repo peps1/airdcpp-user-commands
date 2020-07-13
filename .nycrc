@@ -1,0 +1,17 @@
+{
+  "register": "babel-register",
+  "extends": "@istanbuljs/nyc-config-typescript",
+  "include": [
+    "src/*.ts",
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "src/tests/*",
+    "src/index.ts"
+  ],
+  "all": true,
+
+  "lines": 90,
+  "branches": 90,
+  "check-coverage": false
+}
