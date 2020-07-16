@@ -6,7 +6,7 @@
 ### Added
 - New command /os
 - New command /speed
-- Added to new chat command listeners (needs minimum AirDC++w v2.8.0)
+- Added to new chat command listeners (needs minimum AirDC++w v2.8.0, otherwise fallback to old ones)
   - https://airdcpp.docs.apiary.io/#reference/private-chat-sessions/event-listeners/private-chat-text-command
   - https://airdcpp.docs.apiary.io/#reference/hub-sessions/event-listeners/hub-text-command
 
