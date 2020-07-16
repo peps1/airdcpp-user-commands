@@ -12,6 +12,7 @@
 
 ### Changed
 - Updated dependencies
+- Changed command /version - now showing AirDC version and infos about each installed extension
 
 ## [v2.0.0-beta](https://github.com/peps1/airdcpp-user-commands/tree/v2.0.0-beta.6) (2020-07-11)
 [Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v1.1.0-beta.1...v2.0.0-beta.6)
@@ -47,7 +48,6 @@
 - total_stats value
 
 ## [v1.0.4](https://github.com/peps1/airdcpp-user-commands/tree/v1.0.4) (2020-01-04)
+[Full git log](https://github.com/peps1/airdcpp-user-commands/compare/39335e4ab6e8f79c3b3984b47d80907fc7e89f46...v1.0.4)
 
 Initial release
-
-[Full git log](https://github.com/peps1/airdcpp-user-commands/compare/39335e4ab6e8f79c3b3984b47d80907fc7e89f46...v1.0.4)

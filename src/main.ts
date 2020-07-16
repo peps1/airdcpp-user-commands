@@ -219,18 +219,17 @@ export default (socket: APISocket, extension: any) => {
 
   // /version command
   const printVersion = async (type: string, entityId: string|number) => {
-    let version;
-    if (process.env.npm_package_version) {
-      version = process.env.npm_package_version;
-    } else if (EXTENSION_VERSION) {
-      version = EXTENSION_VERSION;
-    } else {
-      version = 'Couldn\'t define version'
-    }
-
+    const extensions: any = await socket.get('extensions');
+    const sysinfoResults: any = await socket.get('system/system_info');
+    const output: any = [];
+    output.push(`${sysinfoResults.client_version} - ${sysinfoResults.platform}`);
+    output.push('Installed extensions:');
+    extensions.forEach((ext: any) => {
+      const status = (ext.running) ? 'running' : 'stopped';
+      output.push(`${ext.name} (${status}) [${ext.version}] published by ${ext.author} (${ext.homepage || 'homepage not set'})`);
+    });
     // sendMessage(message, `Extension Version: ${output}`, type);
-    printStatusMessage(`Extension Version: ${version}`, type, entityId);
-
+    printStatusMessage(output.join('\n'), type, entityId);
   };
 
   const listShareContent = async (userResults: any, fileListResult: any) => {
