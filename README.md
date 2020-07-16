@@ -1,6 +1,6 @@
-# airdcpp-user-commands [![Travis][build-badge]][build] [![npm package][npm-badge]][npm] [![npm downloads][npm-dl-badge]][npm] [![codecov][coverage-badge]][coverage]
+# airdcpp-user-commands [![GitHub Actions][build-badge]][build] [![npm package][npm-badge]][npm] [![npm downloads][npm-dl-badge]][npm] [![codecov][coverage-badge]][coverage]
 
-Extension to run commands to output information.
+Extension to run commands from chat to output information or trigger actions. See `/help` for a full list
 
 - [Bug tracker](https://github.com/peps1/airdcpp-user-commands/issues)
 - [Changelog](https://github.com/peps1/airdcpp-user-commands/blob/master/CHANGELOG.md)
@@ -12,22 +12,23 @@ Extension to run commands to output information.
 ## Available Commands
 
 | Command | Description | Visibility |
-| :---    | :--- | :--- |
+| :---    | :---        | :---       |
+| /help   | Show this help | (private, visible only to yourself) |
 | /uptime | Show uptime (Client & System) | (public, visible to everyone) |
 | /speed  | Show current network Upload/Download speed | (public, visible to everyone) |
 | /os     | Show the operating system | (public, visible to everyone) |
 | /stats  | Show various stats (Client, Uptime, Ratio, CPU)| (public, visible to everyone) |
-| /ratio  | Show Upload/Download stats| (public, visible to everyone) |
+| /ratio  | Show (all-time) Upload/Download stats| (public, visible to everyone) |
 | /sratio | Show Session Upload/Download stats| (public, visible to everyone) |
-| /list username /share/folder | List all items within a users shared folder, writing items to local file | (private, visible only to yourself) |
-| /version | Show user-commands extension version| (private, visible only to yourself) |
+| /list username /share/folder | List all items within a users shared folder<br>Writing items to local file | (private, visible only to yourself) |
+| /version | Show AirDC and all extension versions| (private, visible only to yourself) |
 
 ## Resources
 
 - [AirDC++ Web API reference](https://airdcpp.docs.apiary.io/)
 
-[build-badge]: https://img.shields.io/travis/peps1/airdcpp-user-commands/master.svg?style=flat-square
-[build]: https://travis-ci.org/peps1/airdcpp-user-commands
+[build-badge]: https://github.com/peps1/airdcpp-user-commands/workflows/build/badge.svg
+[build]: https://github.com/peps1/airdcpp-user-commands/actions
 
 [npm-badge]: https://img.shields.io/npm/v/airdcpp-user-commands.svg?style=flat-square
 [npm]: https://www.npmjs.org/package/airdcpp-user-commands
