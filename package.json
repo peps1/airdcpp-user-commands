@@ -2,6 +2,7 @@
   "name": "airdcpp-user-commands",
   "version": "2.1.0-beta.6",
   "description": "User commands to show information in chat",
+  "homepage": "https://github.com/peps1/airdcpp-user-commands",
   "license": "MIT",
   "author": {
     "name": "pepsi"
