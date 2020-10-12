@@ -62,7 +62,7 @@ export const formatDateTime = (seconds: string): string => {
 
 // Works only for directories
 export const getLastDirectory = (fullPath: string) => {
-  const result = fullPath.match(/([^\\/]+)[\\/]$/);
+  const result = fullPath.match(/([^/]+)[/]?$/);
   return result ? result[1] : fullPath;
 };
 
