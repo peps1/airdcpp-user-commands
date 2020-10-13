@@ -2,7 +2,6 @@ import fs from 'fs'
 
 import * as Utils from '../utils'
 import { printEvent, printStatusMessage } from '../log'
-import { APISocket } from 'airdcpp-apisocket'
 
 const listShareContent = async (userResults: any, fileListResult: any) => {
   // The Download might take a moment, make sure we don't ask the content too early

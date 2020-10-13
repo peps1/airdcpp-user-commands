@@ -1,4 +1,3 @@
-
 import { ManagedExtension } from 'airdcpp-extension';
 
 // Entry point that is executed by the extension manager

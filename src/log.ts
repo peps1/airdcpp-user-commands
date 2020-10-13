@@ -1,4 +1,3 @@
-
 // https://airdcpp.docs.apiary.io/#reference/private-chat-sessions/methods/send-status-message
 // https://airdcpp.docs.apiary.io/#reference/hub-sessions/messages/send-status-message
 export const printStatusMessage = (statusMessage: string, type: string, entityId: string|number) => {

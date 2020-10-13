@@ -1,9 +1,6 @@
 'use strict';
 
-import os from 'os';
 import type { APISocket } from 'airdcpp-apisocket';
-import * as Utils from './utils';
-import { printStatusMessage, printEvent } from './log';
 import { onChatCommand, onOutgoingHubMessage, onOutgoingPrivateMessage } from './chat';
 
 
@@ -40,22 +37,6 @@ export default (socket: APISocket, extension: any) => {
 			...SettingDefinitions,
 		],
 	});
-
-
-
-
-
-
-
-
-
-  
-
-
-
-
-
-
 
 
   extension.onStart = async (sessionInfo: any) => {
