@@ -2,17 +2,18 @@
 import { expect } from 'chai';
 import { describe, it } from 'mocha';
 import sinon from 'sinon';
-import * as assert from 'assert';
+import assert from 'assert';
+import ChildProcess from 'child_process';
+import os from 'os';
 
-import { clientUptime, formatSize, formatDateTime, getLastDirectory, sleep } from '../utils';
+import { clientUptime, formatSize, formatNetSpeed, formatUptime, formatDateTime, getLastDirectory, sleep, cleanUsername, getOsInfo } from '../utils';
 
 describe('clientUptime', () => {
   it('Should return 4322 seconds', () => {
     const dateStub = sinon.stub(Date, 'now').returns(1654321987);
     const seconds = 1650000;
 
-    const result = clientUptime(seconds);
-    expect(result).to.equal(4322);
+    expect(clientUptime(seconds)).to.equal(4322);
     dateStub.restore();
   });
 });
@@ -24,11 +25,51 @@ describe('formatDateTime', () => {
 });
 
 
-// formatUptime
-// formatNetSpeed
-// cleanUsername
+describe('getOsInfo', () => {
+  it('Should return OS info (Windows)', () => {
+    const sandbox = sinon.createSandbox();
+    sandbox.stub(os, 'platform').returns('win32')
+    sandbox.stub(ChildProcess, 'execSync').returns(Buffer.from('Microsoft Windows [Version 10.0.20226.1000]'))
+
+    expect(getOsInfo().toString()).to.equal(['Microsoft Windows 10.0.20226.1000', []].toString())
+    sandbox.restore();
+  });
+  it('Should return OS info (Linux)', () => {
+    const sandbox = sinon.createSandbox();
+    sandbox.stub(os, 'platform').returns('linux')
+    sandbox.stub(ChildProcess, 'execSync').returns(Buffer.from('Ubuntu 20.04.1 LTS'))
+
+    expect(getOsInfo().toString()).to.equal(['Ubuntu 20.04.1 LTS', []].toString())
+    sandbox.restore();
+  });
+  it('Should return OS info (BSD)', () => {
+    const sandbox = sinon.createSandbox();
+    sandbox.stub(os, 'platform').returns('netbsd')
+    sandbox.stub(ChildProcess, 'execSync').returns(Buffer.from('FreeBSD 11.2-RELEASE-p4 amd64'))
+
+    expect(getOsInfo().toString()).to.equal(['FreeBSD 11.2-RELEASE-p4 amd64', []].toString())
+    sandbox.restore();
+  });
+});
 
 
+describe('cleanUsername', () => {
+  it('Should properly clean Username', () => {
+    expect(cleanUsername('-- *:|"some <>U%sern//\?me')).to.equal('-- ----some --U-sern---me')
+  });
+});
+
+describe('formatUptime', () => {
+  it('Should properly format seconds to human readable time since', () => {
+    expect(formatUptime(54321987)).to.equal('628 days 17 hours 26 minutes 27 seconds')
+  });
+});
+
+describe('formatNetSpeed', () => {
+  it('Should properly format seconds to human readable time since', () => {
+    expect(formatNetSpeed(154321987)).to.equal('147.17MB')
+  });
+});
 
 describe('formatSize', () => {
   it('Should format bytes to MiB, GiB, TiB', () => {
