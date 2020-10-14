@@ -5,6 +5,7 @@ import { printOsInfo } from './commands/os'
 import { printRatioSession, printRatioTotal, printFullStats } from './commands/stats'
 import { printUptime } from './commands/uptime'
 import { printVersion } from './commands/version'
+import { printUser } from './commands/user'
 
 // Basic chat command handling, returns possible status message to post
 // TODO: (legacy, remove at some point)
@@ -19,7 +20,6 @@ const checkLegacyChatCommand = async (message: any, type: string) => {
 
   if (text === '/help') {
     const helpText = `
-
       User commands
 
       /uptime\tShow uptime (Client & System)\t\t\t(public, visible to everyone)
@@ -29,8 +29,8 @@ const checkLegacyChatCommand = async (message: any, type: string) => {
       /ratio\t\tShow Upload/Download stats\t\t\t(public, visible to everyone)
       /sratio\tShow Session Upload/Download stats\t\t\t(public, visible to everyone)
       /version\tShow user-commands extension version\t\t\t(private, visible only to yourself)
-      /list username /share/folder - List all items within a users shared folder, writing items to local file\t\t\t(private, visible only to yourself)
-
+      /user username\tSearch for a user and show the hub user was found on\t\t\t(private, visible only to yourself)
+      /list username /share/folder\tList all items within a users shared folder, writing items to local file\t\t\t(private, visible only to yourself)
     `
     printStatusMessage(helpText, type, message.session_id)
   } else if (text === '/sratio') {
@@ -57,6 +57,9 @@ const checkLegacyChatCommand = async (message: any, type: string) => {
         sendChatMessage(osInfo, type, message.session_id);
       }
       return null;
+  } else if (text.startsWith('/user ')) {
+      printUser(args, type, message.session_id);
+      return null;
   } else if (text === '/version') {
       printVersion(type, message.session_id);
       return null;
@@ -76,7 +79,6 @@ const checkChatCommand = async (type: string, data: any, entityId: string|number
   switch (command) {
     case 'help': {
       const helpText = `
-
       User commands
 
       /uptime\tShow uptime (Client & System)\t\t\t(public, visible to everyone)
@@ -86,8 +88,8 @@ const checkChatCommand = async (type: string, data: any, entityId: string|number
       /ratio\t\tShow Upload/Download stats\t\t\t(public, visible to everyone)
       /sratio\tShow Session Upload/Download stats\t\t\t(public, visible to everyone)
       /version\tShow user-commands extension version\t\t\t(private, visible only to yourself)
-      /list username /share/folder - List all items within a users shared folder, writing items to local file\t\t\t(private, visible only to yourself)
-
+      /user username\tSearch for a user and show the hub user was found on\t\t\t(private, visible only to yourself)
+      /list username /share/folder\tList all items within a users shared folder, writing items to local file\t\t\t(private, visible only to yourself)
       `;
       printStatusMessage(helpText, type, entityId)
       break;
@@ -122,6 +124,10 @@ const checkChatCommand = async (type: string, data: any, entityId: string|number
       }
       break;
     }
+    case 'user': {
+      printUser(args, type, entityId);
+      break;
+    }
     case 'version': {
       printVersion(type, entityId);
       break;
@@ -140,7 +146,7 @@ const checkChatCommand = async (type: string, data: any, entityId: string|number
 // https://airdcpp.docs.apiary.io/#reference/private-chat-sessions/methods/send-chat-message
 export const sendChatMessage = (chatMessage: string, type: string, entityId: string|number) => {
   try {
-    SOCKET.post(`${type}/${entityId}/chat_message`, {
+    globalThis.SOCKET.post(`${type}/${entityId}/chat_message`, {
       text: chatMessage,
       severity: 'info',
     });

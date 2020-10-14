@@ -20,6 +20,7 @@ Extension to run commands from chat to output information or trigger actions. Se
 | /stats  | Show various stats (Client, Uptime, Ratio, CPU)| (public, visible to everyone) |
 | /ratio  | Show (all-time) Upload/Download stats| (public, visible to everyone) |
 | /sratio | Show Session Upload/Download stats| (public, visible to everyone) |
+| /user username | Search for a user and show the hub user was found on | (private, visible only to yourself) |
 | /list username /share/folder | List all items within a users shared folder<br>Writing items to local file | (private, visible only to yourself) |
 | /version | Show AirDC and all extension versions| (private, visible only to yourself) |
 

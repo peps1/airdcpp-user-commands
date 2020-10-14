@@ -4,7 +4,7 @@ import { printEvent } from '../log'
 import { sendChatMessage } from '../chat'
 
 const getRatio = async () => {
-  const results: any = await SOCKET.get('transfers/tranferred_bytes');
+  const results: any = await globalThis.SOCKET.get('transfers/tranferred_bytes');
 
   // Total Stats
   // For some reason the start_total_* values are not beeing updated after the client starts
@@ -49,7 +49,7 @@ export const printRatioTotal = async (type: string, entityId: string|number) => 
 
 // /stats command
 export const printFullStats = async (type: string, entityId: string|number) => {
-  const sysinfoResults: any = await SOCKET.get('system/system_info');
+  const sysinfoResults: any = await globalThis.SOCKET.get('system/system_info');
   const uptime = sysinfoResults.client_started;
   const clientv = sysinfoResults.client_version;
   const osInfoResult = Utils.getOsInfo();

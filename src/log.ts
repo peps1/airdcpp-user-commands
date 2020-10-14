@@ -2,7 +2,7 @@
 // https://airdcpp.docs.apiary.io/#reference/hub-sessions/messages/send-status-message
 export const printStatusMessage = (statusMessage: string, type: string, entityId: string|number) => {
   try {
-    SOCKET.post(`${type}/${entityId}/status_message`, {
+    globalThis.SOCKET.post(`${type}/${entityId}/status_message`, {
       text: statusMessage,
       severity: 'info',
     });
@@ -18,7 +18,7 @@ export const printStatusMessage = (statusMessage: string, type: string, entityId
 // Messages will appear as popups and in the Events Log
 // https://airdcpp.docs.apiary.io/#reference/events
 export const printEvent = (eventMessage: string, severity: string) => {
-  SOCKET.post('events', {
+  globalThis.SOCKET.post('events', {
     text: `${eventMessage}`,
     severity,
   });

@@ -16,7 +16,7 @@ import SettingsManager from 'airdcpp-extension-settings';
 
 export default (socket: APISocket, extension: any) => {
 
-  SOCKET = socket;
+  globalThis.SOCKET = socket;
 
   // Default settings
   const SettingDefinitions = [
@@ -29,7 +29,7 @@ export default (socket: APISocket, extension: any) => {
   ];
 
 	// INITIALIZATION
-	SETTINGS = SettingsManager(SOCKET, {
+	globalThis.SETTINGS = SettingsManager(globalThis.SOCKET, {
 		extensionName: extension.name,
 		configFile: extension.configPath + 'config.json',
 		configVersion: CONFIG_VERSION,
@@ -41,7 +41,7 @@ export default (socket: APISocket, extension: any) => {
 
   extension.onStart = async (sessionInfo: any) => {
 
-    await SETTINGS.load();
+    await globalThis.SETTINGS.load();
 
     const subscriberInfo = {
       id: 'user_commands',
@@ -49,11 +49,11 @@ export default (socket: APISocket, extension: any) => {
     };
 
     if (sessionInfo.system_info.api_feature_level >= 4) {
-      SOCKET.addListener('hubs', 'hub_text_command', onChatCommand.bind(null, 'hubs'));
-      SOCKET.addListener('private_chat', 'private_chat_text_command', onChatCommand.bind(null, 'private_chat'));
+      globalThis.SOCKET.addListener('hubs', 'hub_text_command', onChatCommand.bind(null, 'hubs'));
+      globalThis.SOCKET.addListener('private_chat', 'private_chat_text_command', onChatCommand.bind(null, 'private_chat'));
     } else {
-      SOCKET.addHook('hubs', 'hub_outgoing_message_hook', onOutgoingHubMessage, subscriberInfo);
-      SOCKET.addHook('private_chat', 'private_chat_outgoing_message_hook', onOutgoingPrivateMessage, subscriberInfo);
+      globalThis.SOCKET.addHook('hubs', 'hub_outgoing_message_hook', onOutgoingHubMessage, subscriberInfo);
+      globalThis.SOCKET.addHook('private_chat', 'private_chat_outgoing_message_hook', onOutgoingPrivateMessage, subscriberInfo);
     }
   };
 };
