@@ -1,6 +1,6 @@
 # Changelog
 
-## [v2.2.0-beta.X](https://github.com/peps1/airdcpp-user-commands/tree/v2.2.0-beta.1) (2020-10-15)
+## [v2.2.0-beta.1](https://github.com/peps1/airdcpp-user-commands/tree/v2.2.0-beta.1) (2020-10-18)
 [Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v2.1.0...v2.2.0-beta.1)
 
 ### Added
