@@ -1,4 +1,4 @@
-# airdcpp-user-commands [![GitHub Actions][build-badge]][build] [![npm package][npm-badge]][npm] [![npm downloads][npm-dl-badge]][npm] [![codecov][coverage-badge]][coverage]
+# airdcpp-user-commands [![GitHub Actions][build-badge]][build] [![npm package][npm-badge]][npm] [![npm downloads][npm-dl-badge]][npm] [![snyk][snyk-badge]][snyk] [![codecov][coverage-badge]][coverage] [![codeclimate][codeclimate-badge]][codeclimate]
 
 Extension to run commands from chat to output information or trigger actions. See `/help` for a full list
 
@@ -37,3 +37,9 @@ Extension to run commands from chat to output information or trigger actions. Se
 
 [coverage-badge]: https://codecov.io/gh/peps1/airdcpp-user-commands/branch/master/graph/badge.svg
 [coverage]: https://codecov.io/gh/peps1/airdcpp-user-commands
+
+[codeclimate-badge]: https://api.codeclimate.com/v1/badges/4210f355bf4712d319c7/maintainability
+[codeclimate]: https://codeclimate.com/github/peps1/airdcpp-user-commands/maintainability
+
+[snyk-badge]: https://snyk.io/test/github/peps1/airdcpp-user-commands/badge.svg
+[snyk]: https://snyk.io/test/github/peps1/airdcpp-user-commands
