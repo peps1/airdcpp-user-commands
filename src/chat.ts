@@ -36,39 +36,32 @@ const checkLegacyChatCommand = async (message: any, type: string) => {
 
   if (text === '/help') {
     printStatusMessage(helpText, type, message.session_id)
+  } else if (text === '/airdc') {
+    printAirdcVersion(type, message.session_id);
   } else if (text === '/sratio') {
-      printRatioSession(type, message.session_id);
-      return null;
+    printRatioSession(type, message.session_id);
   } else if (text === '/ratio') {
-      printRatioTotal(type, message.session_id);
-      return null;
+    printRatioTotal(type, message.session_id);
   } else if (text === '/stats') {
-      printFullStats(type, message.session_id);
-      return null;
+    printFullStats(type, message.session_id);
   } else if (text === '/uptime') {
-      printUptime(type, message.session_id);
-      return null;
+    printUptime(type, message.session_id);
   } else if (text === '/speed') {
-      const speedInfo = await printNetworkSpeedInfo();
-      if (speedInfo) {
-        sendChatMessage(speedInfo, type, message.session_id);
-      }
-      return null;
+    const speedInfo = await printNetworkSpeedInfo();
+    if (speedInfo) {
+      sendChatMessage(speedInfo, type, message.session_id);
+    }
   } else if (text === '/os') {
-      const osInfo = await printOsInfo();
-      if (osInfo) {
-        sendChatMessage(osInfo, type, message.session_id);
-      }
-      return null;
+    const osInfo = await printOsInfo();
+    if (osInfo) {
+      sendChatMessage(osInfo, type, message.session_id);
+    }
   } else if (text.startsWith('/user ')) {
-      printUser(args, type, message.session_id);
-      return null;
+    printUser(args, type, message.session_id);
   } else if (text === '/version') {
-      printVersion(type, message.session_id);
-      return null;
+    printVersion(type, message.session_id);
   } else if (text.startsWith('/list ')) {
-      listShare(type, message.session_id, args);
-      return null;
+    listShare(type, message.session_id, args);
   }
 
   return null;
