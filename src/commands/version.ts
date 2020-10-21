@@ -1,4 +1,4 @@
-import { printStatusMessage } from '../log'
+import { printStatusMessage } from '../log';
 
 // /version command
 export const printVersion = async (type: string, entityId: string|number) => {

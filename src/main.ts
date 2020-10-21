@@ -6,10 +6,6 @@ import { onChatCommand, onOutgoingHubMessage, onOutgoingPrivateMessage } from '.
 
 const CONFIG_VERSION = 1;
 
-// This will be populated from webpack
-declare const EXTENSION_VERSION: string;
-
-
 // Settings manager docs: https://github.com/airdcpp-web/airdcpp-extension-settings-js
 import SettingsManager from 'airdcpp-extension-settings';
 

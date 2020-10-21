@@ -1,6 +1,6 @@
-import os from 'os'
-import * as Utils from '../utils'
-import { sendChatMessage } from '../chat'
+import os from 'os';
+import * as Utils from '../utils';
+import { sendChatMessage } from '../chat';
 
 // /uptime command
 export const printUptime = async (type: string, entityId: string|number) => {

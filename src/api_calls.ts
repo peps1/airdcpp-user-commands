@@ -12,15 +12,15 @@ export const searchNicks = async (username: string) => {
     userResults = e;
   }
   return userResults;
-}
+};
 
 export const getUser = async (userCid: string) => {
   let userResults: any;
 
   try {
-    userResults = await globalThis.SOCKET.get(`users/${userCid}`)
+    userResults = await globalThis.SOCKET.get(`users/${userCid}`);
   } catch (e) {
     userResults = e;
   }
   return userResults;
-}
+};

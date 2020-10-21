@@ -32,12 +32,12 @@ export const clientUptime = (startTime: number): number => {
 
 // file path doesn't allow certain characters, so let's strip them
 export const cleanUsername = (username: string): string => {
-  return username.replace(/[/\\?%*:|"<>]/g, '-')
-}
+  return username.replace(/[/\\?%*:|"<>]/g, '-');
+};
 
 export const formatNetSpeed = (byte: number): string => {
-  return bytes(byte, {decimalPlaces: 2})
-}
+  return bytes(byte, {decimalPlaces: 2});
+};
 
 // Format nicely (151 days 18 hours 58 minutes 25 seconds)
 export const formatUptime = (seconds: number): string => {
@@ -57,7 +57,7 @@ export const formatDateTime = (seconds: string): string => {
   return seconds.
     replace(/T/, '_').      // replace T with underscore
     replace(/\..+/, '').    // delete the dot and everything after
-    replace(/:/g, '')       // remove colons
+    replace(/:/g, '');       // remove colons
 };
 
 // Works only for directories

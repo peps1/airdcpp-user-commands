@@ -6,7 +6,7 @@ export const printUser = async (username: string[], type: string, entityId: stri
   let output: string;
   const res = await searchNicks(username[0]);
   if (res[0]) {
-    const user = await getUser(res[0].cid)
+    const user = await getUser(res[0].cid);
     output = `Found user: "${user.nicks}" on Hubs: "${user.hub_names}"`;
   } else {
     output = `Not match found for user: "${username}"`;
