@@ -1,6 +1,6 @@
 import os from 'os';
 import * as Utils from '../utils';
-import { printEvent } from '../log';
+import { printEvent, printStatusMessage } from '../log';
 import { sendChatMessage } from '../chat';
 
 const getRatio = async () => {
@@ -48,7 +48,7 @@ export const printRatioTotal = async (type: string, entityId: string|number) => 
 };
 
 // /stats command
-export const printFullStats = async (type: string, entityId: string|number) => {
+export const printFullStats = async (type: string, entityId: string|number, isPrivate = false) => {
   const sysinfoResults: any = await globalThis.SOCKET.get('system/system_info');
   const uptime = sysinfoResults.client_started;
   const clientv = sysinfoResults.client_version;
@@ -65,7 +65,11 @@ export const printFullStats = async (type: string, entityId: string|number) => {
 -=[ CPU: ${os.cpus()[0].model} ]=-
   `;
 
-  sendChatMessage(output, type, entityId);
+  if (isPrivate) {
+    printStatusMessage(output, type, entityId);
+  } else {
+    sendChatMessage(output, type, entityId);
+  }
 
   if (osInfoErr.length !== 0) {
     printEvent(`Error when getting OS info: ${osInfoErr}`, 'error');

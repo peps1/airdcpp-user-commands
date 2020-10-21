@@ -46,6 +46,8 @@ const checkLegacyChatCommand = async (message: any, type: string) => {
     printRatioTotal(type, message.session_id);
   } else if (text === '/stats') {
     printFullStats(type, message.session_id);
+  } else if (text === '/prvstats') {
+    printFullStats(type, message.session_id, true);
   } else if (text === '/uptime') {
     printUptime(type, message.session_id);
   } else if (text === '/speed') {
@@ -85,6 +87,10 @@ const checkChatCommand = async (type: string, data: any, entityId: string|number
     }
     case 'stats': {
       printFullStats(type, entityId);
+      break;
+    }
+    case 'prvstats': {
+      printFullStats(type, entityId, true);
       break;
     }
     case 'ratio': {
