@@ -1,5 +1,17 @@
 # Changelog
 
+## [v2.2.0-beta.2](https://github.com/peps1/airdcpp-user-commands/tree/v2.2.0-beta.2) (2020-10-21)
+[Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v2.2.0-beta.1...v2.2.0-beta.2)
+
+### Added
+- New command /airdc
+- New command /prvstats
+
+### Changed
+- Added extension name to event messages
+- Some cleanup
+- Updated dependencies
+
 ## [v2.2.0-beta.1](https://github.com/peps1/airdcpp-user-commands/tree/v2.2.0-beta.1) (2020-10-18)
 [Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v2.1.0...v2.2.0-beta.1)
 
