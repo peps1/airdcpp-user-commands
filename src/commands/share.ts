@@ -1,15 +1,15 @@
-import fs from 'fs'
+import fs from 'fs';
 
-import * as Utils from '../utils'
-import { printEvent, printStatusMessage } from '../log'
-import { searchNicks } from '../api_calls'
+import * as Utils from '../utils';
+import { printEvent, printStatusMessage } from '../log';
+import { searchNicks } from '../api_calls';
 
 const listShareContent = async (userResults: any, fileListResult: any) => {
   // The Download might take a moment, make sure we don't ask the content too early
   // TODO: Make sure this doesn't try forever, timeout after 30 seconds
   // TODO: check for failed states
   if (fileListResult.state.id !== 'loaded') {
-    let fileListState = 'downloading'
+    let fileListState = 'downloading';
     while (fileListState !== 'loaded') {
       await Utils.sleep(1000);
       // get the current filelist state
@@ -22,13 +22,13 @@ const listShareContent = async (userResults: any, fileListResult: any) => {
 
   const currentDateTime = Utils.formatDateTime(new Date().toISOString());
   const outputFolderName = globalThis.SETTINGS.getValue('output_directory');
-  const username = Utils.cleanUsername(userResults[0].nick)
+  const username = Utils.cleanUsername(userResults[0].nick);
   const outputFilePath = `${outputFolderName}/share_list_${username}-${currentDateTime}.txt`;
 
 
   // make sure the Output folder exists
   if (!fs.existsSync(outputFolderName)) {
-    fs.mkdir(outputFolderName, { recursive: true }, (err) => { return err });
+    fs.mkdir(outputFolderName, { recursive: true }, (err) => { return err; });
   }
 
   // Write to file
@@ -37,10 +37,10 @@ const listShareContent = async (userResults: any, fileListResult: any) => {
     printEvent(`Error writing to file - ${error}`, 'error');
   });
   userFilelistItems.items.forEach((item: any) => {
-    f.write(item.name + '\n')
-  })
-  return { fileListResult, outputFilePath }
-}
+    f.write(item.name + '\n');
+  });
+  return { fileListResult, outputFilePath };
+};
 
 const getFileListItems = async (userResults: any) => {
   try {
@@ -50,7 +50,7 @@ const getFileListItems = async (userResults: any) => {
     printEvent(`File results: ${e.code} - ${e.message}`, 'error');
     return;
   }
-}
+};
 
 const getFileListSessionInfo = async (userResults: any) => {
   try {
@@ -60,7 +60,7 @@ const getFileListSessionInfo = async (userResults: any) => {
     printEvent(`File results: ${e.code} - ${e.message}`, 'error');
     return;
   }
-}
+};
 
 // /list command
 export const listShare = async (type: string, entityId: string|number, args: any) => {

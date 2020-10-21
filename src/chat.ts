@@ -1,12 +1,12 @@
-import { listShare } from './commands/share'
-import { printEvent, printStatusMessage } from './log'
-import { printNetworkSpeedInfo } from './commands/speed'
-import { printOsInfo } from './commands/os'
-import { printRatioSession, printRatioTotal, printFullStats } from './commands/stats'
-import { printUptime } from './commands/uptime'
-import { printVersion } from './commands/version'
-import { printUser } from './commands/user'
-import { printAirdcVersion } from './commands/airdc'
+import { listShare } from './commands/share';
+import { printEvent, printStatusMessage } from './log';
+import { printNetworkSpeedInfo } from './commands/speed';
+import { printOsInfo } from './commands/os';
+import { printRatioSession, printRatioTotal, printFullStats } from './commands/stats';
+import { printUptime } from './commands/uptime';
+import { printVersion } from './commands/version';
+import { printUser } from './commands/user';
+import { printAirdcVersion } from './commands/airdc';
 
 const helpText = `
         #######################
@@ -37,7 +37,7 @@ const checkLegacyChatCommand = async (message: any, type: string) => {
   const args = command.slice(1);
 
   if (text === '/help') {
-    printStatusMessage(helpText, type, message.session_id)
+    printStatusMessage(helpText, type, message.session_id);
   } else if (text === '/airdc') {
     printAirdcVersion(type, message.session_id);
   } else if (text === '/sratio') {
@@ -76,7 +76,7 @@ const checkChatCommand = async (type: string, data: any, entityId: string|number
 
   switch (command) {
     case 'help': {
-      printStatusMessage(helpText, type, entityId)
+      printStatusMessage(helpText, type, entityId);
       break;
     }
     case 'airdc': {

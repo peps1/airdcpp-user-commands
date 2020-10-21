@@ -1,5 +1,5 @@
-import * as Utils from '../utils'
-import { printEvent } from '../log'
+import * as Utils from '../utils';
+import { printEvent } from '../log';
 
 // /os command
 export const printOsInfo = async () => {

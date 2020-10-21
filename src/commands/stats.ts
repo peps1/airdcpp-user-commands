@@ -1,7 +1,7 @@
-import os from 'os'
-import * as Utils from '../utils'
-import { printEvent } from '../log'
-import { sendChatMessage } from '../chat'
+import os from 'os';
+import * as Utils from '../utils';
+import { printEvent } from '../log';
+import { sendChatMessage } from '../chat';
 
 const getRatio = async () => {
   const results: any = await globalThis.SOCKET.get('transfers/tranferred_bytes');

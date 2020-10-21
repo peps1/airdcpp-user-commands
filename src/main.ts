@@ -6,7 +6,7 @@ import { onChatCommand, onOutgoingHubMessage, onOutgoingPrivateMessage } from '.
 
 const CONFIG_VERSION = 1;
 
-// This will be populated with version from webpack
+// This will be populated from webpack
 declare const EXTENSION_VERSION: string;
 
 
