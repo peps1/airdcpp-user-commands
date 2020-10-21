@@ -17,7 +17,9 @@ Extension to run commands from chat to output information or trigger actions. Se
 | /uptime | Show uptime (Client & System) | (public, visible to everyone) |
 | /speed  | Show current network Upload/Download speed | (public, visible to everyone) |
 | /os     | Show the operating system | (public, visible to everyone) |
+| /airdc  | Show AirDC++w version and client uptime | (public, visible to everyone) |
 | /stats  | Show various stats (Client, Uptime, Ratio, CPU)| (public, visible to everyone) |
+| /prvstats  | Show various stats (Client, Uptime, Ratio, CPU)| (private, visible only to yourself) |
 | /ratio  | Show (all-time) Upload/Download stats| (public, visible to everyone) |
 | /sratio | Show Session Upload/Download stats| (public, visible to everyone) |
 | /user username | Search for a user and show the hub user was found on | (private, visible only to yourself) |
