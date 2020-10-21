@@ -1,7 +1,7 @@
 # Changelog
 
-## [v2.2.0-beta.2](https://github.com/peps1/airdcpp-user-commands/tree/v2.2.0-beta.2) (2020-10-21)
-[Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v2.2.0-beta.1...v2.2.0-beta.2)
+## [v2.2.0-beta.3](https://github.com/peps1/airdcpp-user-commands/tree/v2.2.0-beta.3) (2020-10-21)
+[Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v2.2.0-beta.1...v2.2.0-beta.3)
 
 ### Added
 - New command `/airdc`
