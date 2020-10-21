@@ -4,8 +4,8 @@
 [Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v2.2.0-beta.1...v2.2.0-beta.2)
 
 ### Added
-- New command /airdc
-- New command /prvstats
+- New command `/airdc`
+- New command `/prvstats`
 
 ### Changed
 - Added extension name to event messages
@@ -16,7 +16,7 @@
 [Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v2.1.0...v2.2.0-beta.1)
 
 ### Added
-- New command /user
+- New command `/user`
 
 ### Changed
 - Lots of code refactoring
@@ -26,8 +26,8 @@
 [Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v2.0.0-beta.6...v2.1.0)
 
 ### Added
-- New command /os
-- New command /speed
+- New command `/os`
+- New command `/speed`
 - Added to new chat command listeners (needs minimum AirDC++w v2.8.0, otherwise fallback to old ones)
   - https://airdcpp.docs.apiary.io/#reference/private-chat-sessions/event-listeners/private-chat-text-command
   - https://airdcpp.docs.apiary.io/#reference/hub-sessions/event-listeners/hub-text-command
@@ -40,8 +40,8 @@
 [Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v1.1.0-beta.1...v2.0.0-beta.6)
 
 ### Added
-- New command /list
-- New command /version
+- New command `/list`
+- New command `/version`
 
 ### Changed
 - Change code base to typescript
