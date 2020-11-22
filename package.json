@@ -68,7 +68,7 @@
     "webpack-cli": "^4.1.0"
   },
   "dependencies": {
-    "airdcpp-apisocket": "^2.4.0",
+    "airdcpp-apisocket": "^2.4.1",
     "airdcpp-extension": "^1.3.0",
     "airdcpp-extension-settings": "^1.1.0"
   },
