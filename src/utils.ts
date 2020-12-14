@@ -88,7 +88,7 @@ export const getOsInfo = (): any[] => {
         .trim();
     } catch (e) {
       osInfo = 'Unknown Linux';
-      errors.push(e);
+      // errors.push(e);
     }
   } else if (os.platform() === 'darwin') {
     const osRelease = ChildProcess.execSync('sw_vers -productVersion').toString().trim();
@@ -102,7 +102,7 @@ export const getOsInfo = (): any[] => {
         .trim();
     } catch (e) {
       osInfo = 'Unknown BSD';
-      errors.push(e);
+      // errors.push(e);
     }
   } else {
     osInfo = 'Unknown OS';

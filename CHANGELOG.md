@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.2.0-beta.5](https://github.com/peps1/airdcpp-user-commands/tree/v2.2.0-beta.5) (2020-12-14)
+[Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v2.2.0-beta.4...v2.2.0-beta.5)
+
+### Changed
+- Remove some error messages when getting OS information
+
 ## [v2.2.0-beta.4](https://github.com/peps1/airdcpp-user-commands/tree/v2.2.0-beta.4) (2020-12-13)
 [Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v2.2.0-beta.3...v2.2.0-beta.4)
 
