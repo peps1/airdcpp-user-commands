@@ -87,7 +87,15 @@ export const getOsInfo = (): any[] => {
         .toString()
         .trim();
     } catch (e) {
-      osInfo = 'Unknown Linux';
+      try {
+        osInfo = 'Linux ' + ChildProcess
+          .execSync('uname -r')
+          .toString()
+          .trim();
+      } catch (err) {
+        osInfo = 'Linux';
+        // errors.push(err);
+      }
       // errors.push(e);
     }
   } else if (os.platform() === 'darwin') {
