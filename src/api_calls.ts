@@ -4,7 +4,7 @@ export const searchNicks = async (username: string) => {
   let userResults: any;
 
   try {
-    userResults = await globalThis.SOCKET.post('users/search_nicks', {
+    userResults = await global.SOCKET.post('users/search_nicks', {
       pattern: username,
       max_results: 1,
     });
@@ -18,7 +18,7 @@ export const getUser = async (userCid: string) => {
   let userResults: any;
 
   try {
-    userResults = await globalThis.SOCKET.get(`users/${userCid}`);
+    userResults = await global.SOCKET.get(`users/${userCid}`);
   } catch (e) {
     userResults = e;
   }

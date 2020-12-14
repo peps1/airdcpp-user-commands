@@ -8,7 +8,7 @@ const onTransferStats = (data: (string|number)[]) => {
 };
 
 export const printNetworkSpeedInfo = async () => {
-  const removeTransferStatsListener = await globalThis.SOCKET.addListener('transfers', 'transfer_statistics', onTransferStats);
+  const removeTransferStatsListener = await global.SOCKET.addListener('transfers', 'transfer_statistics', onTransferStats);
 
   // Wait for the events to come in and pobulate transferStats
   let timeWaiting = 0;

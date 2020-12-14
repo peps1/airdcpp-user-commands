@@ -21,7 +21,7 @@ const listShareContent = async (userResults: any, fileListResult: any) => {
   const userFilelistItems: any = await getFileListItems(userResults);
 
   const currentDateTime = Utils.formatDateTime(new Date().toISOString());
-  const outputFolderName = globalThis.SETTINGS.getValue('output_directory');
+  const outputFolderName = global.SETTINGS.getValue('output_directory');
   const username = Utils.cleanUsername(userResults[0].nick);
   const outputFilePath = `${outputFolderName}/share_list_${username}-${currentDateTime}.txt`;
 
@@ -44,7 +44,7 @@ const listShareContent = async (userResults: any, fileListResult: any) => {
 
 const getFileListItems = async (userResults: any) => {
   try {
-    const userFilelistItems = await globalThis.SOCKET.get(`filelists/${userResults[0].cid}/items/0/9999`);
+    const userFilelistItems = await global.SOCKET.get(`filelists/${userResults[0].cid}/items/0/9999`);
     return userFilelistItems;
   } catch (e) {
     printEvent(`File results: ${e.code} - ${e.message}`, 'error');
@@ -54,7 +54,7 @@ const getFileListItems = async (userResults: any) => {
 
 const getFileListSessionInfo = async (userResults: any) => {
   try {
-    const userFilelistSession = await globalThis.SOCKET.get(`filelists/${userResults[0].cid}`);
+    const userFilelistSession = await global.SOCKET.get(`filelists/${userResults[0].cid}`);
     return userFilelistSession;
   } catch (e) {
     printEvent(`File results: ${e.code} - ${e.message}`, 'error');
@@ -83,7 +83,7 @@ export const listShare = async (type: string, entityId: string|number, args: any
 
     try {
       // Try to open the file list of that User
-      fileListResult = await globalThis.SOCKET.post('filelists', {
+      fileListResult = await global.SOCKET.post('filelists', {
         user: {
           cid: userResults[0].cid,
           hub_url: userResults[0].hub_url,
@@ -102,7 +102,7 @@ export const listShare = async (type: string, entityId: string|number, args: any
         if (`${listDir}` !== fileListResult.location.path) {
           // A file list might be open already, but for another directory
           try {
-            await globalThis.SOCKET.post(`filelists/${userResults[0].cid}/directory`, {
+            await global.SOCKET.post(`filelists/${userResults[0].cid}/directory`, {
               list_path: `${listDir}`,
               reload: false,
             });

@@ -1,5 +1,12 @@
 # Changelog
 
+## [v2.2.0-beta.4](https://github.com/peps1/airdcpp-user-commands/tree/v2.2.0-beta.4) (2020-12-13)
+[Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v2.2.0-beta.3...v2.2.0-beta.4)
+
+### Changed
+- Add support again for node 10
+- optimize `/version` output
+
 ## [v2.2.0-beta.3](https://github.com/peps1/airdcpp-user-commands/tree/v2.2.0-beta.3) (2020-10-21)
 [Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v2.2.0-beta.1...v2.2.0-beta.3)
 
