@@ -16,14 +16,14 @@ const helpText = `
         /uptime\tShow uptime (Client & System)\t\t\t(public, visible to everyone)
         /speed\tShow current network Upload/Download speed\t\t\t(public, visible to everyone)
         /os\t\tShow the operating system\t\t\t(public, visible to everyone)
-        /airdc\t\tShow AirDC++w version and client uptime\t\t\t(public, visible to everyone)
+        /airdc\t\tShow AirDC++w version\t\t\t(public, visible to everyone)
         /stats\t\tShow various stats (Client, Uptime, Ratio, CPU)\t\t\t(public, visible to everyone)
         /prvstats\t\tShow various stats (Client, Uptime, Ratio, CPU)\t\t\t(private, visible only to yourself)
         /ratio\t\tShow Upload/Download stats\t\t\t(public, visible to everyone)
         /sratio\tShow Session Upload/Download stats\t\t\t(public, visible to everyone)
-        /version\tShow user-commands extension version\t\t\t(private, visible only to yourself)
         /user username\tSearch for a user and show the hub user was found on\t\t\t(private, visible only to yourself)
         /list username /share/folder\tList all items within a users shared folder, writing items to local file\t\t\t(private, visible only to yourself)
+        /version\tShow AirDC and all extension versions\t\t\t(private, visible only to yourself)
 `;
 
 // Basic chat command handling, returns possible status message to post
