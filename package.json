@@ -1,7 +1,7 @@
 {
   "name": "airdcpp-user-commands",
-  "version": "2.2.0",
-  "description": "Extension to run commands from chat to output information or trigger actions. See `/help` for a full list",
+  "version": "2.2.1",
+  "description": "Extension to run commands from chat to output information or trigger actions. See /help for a full list",
   "homepage": "https://github.com/peps1/airdcpp-user-commands",
   "license": "MIT",
   "author": {
