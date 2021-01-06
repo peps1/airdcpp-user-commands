@@ -1,5 +1,17 @@
 # Changelog
 
+## [v2.2.2](https://github.com/peps1/airdcpp-user-commands/tree/v2.2.2) (2021-01-06)
+[Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v2.2.1...v2.2.2)
+
+### Changed
+- Update dependencies
+
+## [v2.2.1](https://github.com/peps1/airdcpp-user-commands/tree/v2.2.1) (2020-12-17)
+[Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v2.2.0...v2.2.1)
+
+### Changed
+- Update `/help` text and README
+
 ## [v2.2.0](https://github.com/peps1/airdcpp-user-commands/tree/v2.2.0) (2020-12-17)
 [Full git log](https://github.com/peps1/airdcpp-user-commands/compare/v2.2.0-beta.5...v2.2.0)
 
