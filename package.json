@@ -70,7 +70,7 @@
   },
   "dependencies": {
     "airdcpp-apisocket": "^2.4.1",
-    "airdcpp-extension": "^1.5.0",
+    "airdcpp-extension": "^1.5.1",
     "airdcpp-extension-settings": "^1.2.1"
   },
   "main": "dist/main",
